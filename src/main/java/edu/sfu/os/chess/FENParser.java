@@ -2,19 +2,21 @@ package edu.sfu.os.chess;
 
 import java.util.Arrays;
 
-/** FENParser is a class that parses FEN strings into bitboards
- * Since a lot of current feature for the bit board has not exist yet,
- * most of FENParser methods are place holder.
+/** FENParser is a class that parses FEN strings into bitboards.
+ * Since bitboards has not been implemented, most of FENParser methods are place holder.
  */
 public class FENParser {
     /** A placeholder bitboard that will be result of the parse
-     * 0 wpawn, 1 wknight, 2 wbishop, 3 wrook, 4 wqueen, 5 wking,
-     * 6 bpawn, 7 bknight, 8 bbishop, 9 brook, 10 bqueen, 11 bking.
-     * since the result can be overflow due to lack of unsigned, it is recommend to set 16 array
-     * instead of the optimized 8.
+     * 0 Wpawn, 1 Wknight, 2 Wbishop, 3 Wrook, 4 Wqueen, 5 Wking, 6 Bpawn, 7 Bknight, 8 Bbishop,
+     * 9 Brook, 10 Bqueen, 11 Bking.
      */
-    private long[] bitBoards = new long[16];
+    private long[] bitBoards = new long[12];
+    private int halfmoveClock;
+    private int fullmoveCounter;
 
+    /** Constructor for FENParser, most of the work will be performed inside
+     * @param fenString string following FEN
+     */
     public FENParser(String fenString) {
         String[] fenElements = fenString.split(" ");
 
@@ -22,11 +24,14 @@ public class FENParser {
         currentSide(fenElements[1]);
         checkCastling(fenElements[2]);
         checkEnPassant(fenElements[3]);
-        int halfmoveClock = Integer.parseInt(fenElements[4]);
-        int fullmoveCounter = Integer.parseInt(fenElements[5]);
-        drawArray();
+        halfmoveClock = Integer.parseInt(fenElements[4]);
+        fullmoveCounter = Integer.parseInt(fenElements[5]);
     }
 
+    /**
+     * piecePlacement method created bitboards from the parse information
+     * @param board string obtain from FEN
+     */
     private void piecePlacement(String board) {
         String binary;
         String[] ranks = board.split("/");
@@ -55,6 +60,9 @@ public class FENParser {
         }
     }
 
+    /** currentSide check the current playing side from FEN, placeholder
+     * @param side string obtain from FEN
+     */
     private void currentSide(String side) {
         if (side.equals("w")){
             System.out.println("Current mover is white");
@@ -64,6 +72,9 @@ public class FENParser {
         }
     }
 
+    /** checkCastling check available Castling Rights, placeholder
+     * @param castling string obtain from FEN
+     */
     private void checkCastling(String castling) {
         if (castling.equals("-")) {
             System.out.println("Neither side can castle");
@@ -87,6 +98,9 @@ public class FENParser {
         }
     }
 
+    /** checkEnPassant check possible en passant square, placeholder
+     * @param enPassant string obtain from FEN
+     */
     private void checkEnPassant(String enPassant) {
         if (enPassant.equals("-")) {
             System.out.println("No en passant can happen");
@@ -96,37 +110,55 @@ public class FENParser {
         }
     }
 
-    private void drawArray() {
-        String[][] chessBoard =new String[8][8];
+    /** drawArray visualizes the generated bit board. Will be removed when bit board is implemented
+     */
+    public String[] drawArray() {
+        String[][] createdChessBoard = new String[8][8];
+        String[] finalChessBoard = new String[8];
         for (int i=0;i<64;i++) {
-            chessBoard[i/8][i%8]=" ";
+            createdChessBoard[i/8][i%8]=" ";
         }
         for (int i=0;i<64;i++) {
-            if (((bitBoards[0]>>i)&1)==1) {chessBoard[i/8][i%8]="P";}
-            if (((bitBoards[1]>>i)&1)==1) {chessBoard[i/8][i%8]="N";}
-            if (((bitBoards[2]>>i)&1)==1) {chessBoard[i/8][i%8]="B";}
-            if (((bitBoards[3]>>i)&1)==1) {chessBoard[i/8][i%8]="R";}
-            if (((bitBoards[4]>>i)&1)==1) {chessBoard[i/8][i%8]="Q";}
-            if (((bitBoards[5]>>i)&1)==1) {chessBoard[i/8][i%8]="K";}
-            if (((bitBoards[6]>>i)&1)==1) {chessBoard[i/8][i%8]="p";}
-            if (((bitBoards[7]>>i)&1)==1) {chessBoard[i/8][i%8]="n";}
-            if (((bitBoards[8]>>i)&1)==1) {chessBoard[i/8][i%8]="b";}
-            if (((bitBoards[9]>>i)&1)==1) {chessBoard[i/8][i%8]="r";}
-            if (((bitBoards[10]>>i)&1)==1) {chessBoard[i/8][i%8]="q";}
-            if (((bitBoards[11]>>i)&1)==1) {chessBoard[i/8][i%8]="k";}
+            if (((bitBoards[0]>>i)&1)==1) {createdChessBoard[i/8][i%8]="P";}
+            if (((bitBoards[1]>>i)&1)==1) {createdChessBoard[i/8][i%8]="N";}
+            if (((bitBoards[2]>>i)&1)==1) {createdChessBoard[i/8][i%8]="B";}
+            if (((bitBoards[3]>>i)&1)==1) {createdChessBoard[i/8][i%8]="R";}
+            if (((bitBoards[4]>>i)&1)==1) {createdChessBoard[i/8][i%8]="Q";}
+            if (((bitBoards[5]>>i)&1)==1) {createdChessBoard[i/8][i%8]="K";}
+            if (((bitBoards[6]>>i)&1)==1) {createdChessBoard[i/8][i%8]="p";}
+            if (((bitBoards[7]>>i)&1)==1) {createdChessBoard[i/8][i%8]="n";}
+            if (((bitBoards[8]>>i)&1)==1) {createdChessBoard[i/8][i%8]="b";}
+            if (((bitBoards[9]>>i)&1)==1) {createdChessBoard[i/8][i%8]="r";}
+            if (((bitBoards[10]>>i)&1)==1) {createdChessBoard[i/8][i%8]="q";}
+            if (((bitBoards[11]>>i)&1)==1) {createdChessBoard[i/8][i%8]="k";}
         }
         for (int i=0;i<8;i++) {
-            System.out.println(Arrays.toString(chessBoard[i]));
+            finalChessBoard[i] =  Arrays.toString(createdChessBoard[i]);
+        }
+        return finalChessBoard;
+    }
+
+    /** convertStringToBitboard convert binary string to unsigned long value
+     * @param binary long value in binary string form
+     * @return unsigned long value
+     */
+    private long convertStringToBitboard(String binary) {
+        if (binary.charAt(0)=='0') {
+            return Long.parseLong(binary, 2);
+        } else {
+            return Long.parseUnsignedLong(binary, 2);
         }
     }
 
-    private long convertStringToBitboard(String binary) {
-        long value;
-        if (binary.charAt(0)=='0') {
-            value = Long.parseLong(binary, 2);
-        } else {
-            value = Long.parseUnsignedLong(binary, 2);
-        }
-        return value;
+    public long[] getBitBoards() {
+        return bitBoards;
+    }
+
+    public int getHalfmoveClock() {
+        return halfmoveClock;
+    }
+
+    public int getFullmoveCounter() {
+        return fullmoveCounter;
     }
 }
