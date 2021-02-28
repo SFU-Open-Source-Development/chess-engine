@@ -20,7 +20,7 @@ public class FENParserTest {
     }
     
     @Test
-    public void testHalfmoveClock(){
+    public void testHalfmoveClock1(){
         String fenString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         FENParser parser = new FENParser(fenString);
         int halfmoveClock = parser.getHalfmoveClock();
@@ -28,7 +28,7 @@ public class FENParserTest {
     }
 
     @Test
-    public void testFullmoveCounter() {
+    public void testFullmoveCounter1() {
         String fenString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         FENParser parser = new FENParser(fenString);
         int fullmoveCounter = parser.getFullmoveCounter();
@@ -47,5 +47,31 @@ public class FENParserTest {
             System.out.println(draw[i]);
         }
         assertArrayEquals(expectedDraw,draw);
+    }
+
+    @Test
+    public void testBitBoard2(){
+        String fenString = "b1k2rn1/4q3/3p4/p4p2/2P2P1R/PRBP2N1/4PK2/2Q5 b - f4 10 30";
+        FENParser parser = new FENParser(fenString);
+        long[] bitBoards = parser.getBitBoards();
+        long[] expectedBitBoards = {4513649850843136L, 70368744177664L, 4398046511104L, 2748779069440L
+                , 288230376151711744L, 9007199254740992L, 554172416, 64, 1, 32, 4096, 4 };
+        assertArrayEquals(bitBoards,expectedBitBoards);
+    }
+
+    @Test
+    public void testHalfmoveClock2(){
+        String fenString = "b1k2rn1/4q3/3p4/p4p2/2P2P1R/PRBP2N1/4PK2/2Q5 b - f4 10 30";
+        FENParser parser = new FENParser(fenString);
+        int halfmoveClock = parser.getHalfmoveClock();
+        assertEquals(10,halfmoveClock);
+    }
+
+    @Test
+    public void testFullmoveCounter2() {
+        String fenString = "b1k2rn1/4q3/3p4/p4p2/2P2P1R/PRBP2N1/4PK2/2Q5 b - f4 10 30";
+        FENParser parser = new FENParser(fenString);
+        int fullmoveCounter = parser.getFullmoveCounter();
+        assertEquals(30,fullmoveCounter);
     }
 }
