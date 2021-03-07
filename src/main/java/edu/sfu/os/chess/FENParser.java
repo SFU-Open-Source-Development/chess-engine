@@ -13,6 +13,12 @@ public class FENParser {
     private long[] bitBoards = new long[12];
     private int halfmoveClock;
     private int fullmoveCounter;
+    private String currentMove;
+    private String enPassant;
+    private boolean castleBlackKing;
+    private boolean castleBlackQueen;
+    private boolean castleWhiteKing;
+    private boolean castleWhiteQueen;
 
     /** Constructor for FENParser, most of the work will be performed inside
      * @param fenString string following FEN
@@ -21,9 +27,9 @@ public class FENParser {
         String[] fenElements = fenString.split(" ");
 
         piecePlacement(fenElements[0]);
-        currentSide(fenElements[1]);
+        currentMove = fenElements[1];
         checkCastling(fenElements[2]);
-        checkEnPassant(fenElements[3]);
+        enPassant = fenElements[3];
         halfmoveClock = Integer.parseInt(fenElements[4]);
         fullmoveCounter = Integer.parseInt(fenElements[5]);
     }
@@ -60,53 +66,25 @@ public class FENParser {
         }
     }
 
-    /** currentSide check the current playing side from FEN, placeholder
-     * @param side string obtain from FEN
-     */
-    private void currentSide(String side) {
-        if (side.equals("w")){
-            System.out.println("Current mover is white");
-        }
-        else {
-            System.out.println("Current mover is black");
-        }
-    }
-
     /** checkCastling check available Castling Rights, placeholder
      * @param castling string obtain from FEN
      */
     private void checkCastling(String castling) {
-        if (castling.equals("-")) {
-            System.out.println("Neither side can castle");
+        castleBlackKing = false;
+        castleBlackQueen = false;
+        castleWhiteKing = false;
+        castleWhiteQueen = false;
+        if (castling.contains("K")) {
+            castleWhiteKing = true;
         }
-        else {
-            String info = "Castling Rights is possible for :";
-            if (castling.contains("K")) {
-                 info = info.concat(" white king,");
-            }
-            if (castling.contains("Q")) {
-                info = info.concat(" white queen,");
-            }
-            if (castling.contains("k")) {
-                info = info.concat(" black king,");
-            }
-            if (castling.contains("q")){
-                info = info.concat(" black queen,");
-            }
-            info = info.substring(0,info.length() - 1);
-            System.out.println(info);
+        if (castling.contains("Q")) {
+            castleWhiteQueen = true;
         }
-    }
-
-    /** checkEnPassant check possible en passant square, placeholder
-     * @param enPassant string obtain from FEN
-     */
-    private void checkEnPassant(String enPassant) {
-        if (enPassant.equals("-")) {
-            System.out.println("No en passant can happen");
+        if (castling.contains("k")) {
+            castleBlackKing = true;
         }
-        else {
-            System.out.println("A pawn can be captured if move into " + enPassant);
+        if (castling.contains("q")){
+            castleBlackQueen = true;
         }
     }
 
@@ -160,5 +138,29 @@ public class FENParser {
 
     public int getFullmoveCounter() {
         return fullmoveCounter;
+    }
+
+    public String getCurrentMove() {
+        return currentMove;
+    }
+
+    public boolean isCastleBlackKing() {
+        return castleBlackKing;
+    }
+
+    public boolean isCastleBlackQueen() {
+        return castleBlackQueen;
+    }
+
+    public boolean isCastleWhiteKing() {
+        return castleWhiteKing;
+    }
+
+    public boolean isCastleWhiteQueen() {
+        return castleWhiteQueen;
+    }
+
+    public String getEnPassant() {
+        return enPassant;
     }
 }
