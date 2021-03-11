@@ -1,19 +1,24 @@
 package edu.sfu.os.chess;
 
 import java.util.*;
-/*
- * PIECE=WHITE/black
- * pawn=P/p
- * kinght (horse)=N/n
- * bishop=B/b
- * rook (castle)=R/r
- * Queen=Q/q
- * King=K/k
+/**
+ * Uppercase letters are WHITE
+ * pawn = P/p
+ * kinght (horse) = N/n
+ * bishop = B/b
+ * rook (castle) = R/r
+ * Queen = Q/q
+ * King = K/k
  */
 public class BoardGeneration {
+    /**
+     * This method passes an array of strings representing the standard chess board
+     * to the bitboard method
+     */
     public static void initiateStandardChess() {
-        long WP=0L,WN=0L,WB=0L,WR=0L,WQ=0L,WK=0L,BP=0L,BN=0L,BB=0L,BR=0L,BQ=0L,BK=0L;
-        String chessBoard[][]={
+        long WP=0L,WN=0L,WB=0L,WR=0L,WQ=0L,WK=0L,BP=0L,BN=0L,BB=0L,BR=0L,BQ=0L,BK=0L;// L just guarantees enough precision(64 bits)
+        //the longs are the bitboards for each individual piece with 1's representing said piece and its location.
+        String[][] chessBoard ={
                 {"r","n","b","q","k","b","n","r"},
                 {"p","p","p","p","p","p","p","p"},
                 {" "," "," "," "," "," "," "," "},
@@ -27,60 +32,99 @@ public class BoardGeneration {
     public static void initiateChess960() {
         //May do this later
     }
+
+    /**
+     * Creates bit boards based on the passed array of strings
+     *
+     * @param chessBoard array of strings representing the chessboard
+     * @param WP long representing white pawns positions
+     * @param WN long representing white knights positions
+     * @param WB long representing white bishops positions
+     * @param WR long representing white rooks positions
+     * @param WQ long representing white queen position
+     * @param WK long representing white king position
+     * @param BP long representing black pawns positions
+     * @param BN long representing black knights positions
+     * @param BB long representing black bishops positions
+     * @param BR long representing black rooks positions
+     * @param BQ long representing black queen position
+     * @param BK long representing black king position
+     */
     public static void arrayToBitboards(String[][] chessBoard,long WP,long WN,long WB,long WR,long WQ,long WK,long BP,long BN,long BB,long BR,long BQ,long BK) {
-        String Binary;
+        String BinaryStr;
         for (int i=0;i<64;i++) {
-            Binary="0000000000000000000000000000000000000000000000000000000000000000";
-            Binary=Binary.substring(i+1)+"1"+Binary.substring(0, i);
+            BinaryStr="0000000000000000000000000000000000000000000000000000000000000000";
+            BinaryStr=BinaryStr.substring(i+1)+"1"+BinaryStr.substring(0, i); //moves the "1" one bit to the left with each iteration
             switch (chessBoard[i/8][i%8]) {
-                case "P": WP+=convertStringToBitboard(Binary);
+                //since there should be no overlap we can add the longs individually with each bit representing a piece of that type
+                case "P": WP+=convertStringToBitboard(BinaryStr);
                     break;
-                case "N": WN+=convertStringToBitboard(Binary);
+                case "N": WN+=convertStringToBitboard(BinaryStr);
                     break;
-                case "B": WB+=convertStringToBitboard(Binary);
+                case "B": WB+=convertStringToBitboard(BinaryStr);
                     break;
-                case "R": WR+=convertStringToBitboard(Binary);
+                case "R": WR+=convertStringToBitboard(BinaryStr);
                     break;
-                case "Q": WQ+=convertStringToBitboard(Binary);
+                case "Q": WQ+=convertStringToBitboard(BinaryStr);
                     break;
-                case "K": WK+=convertStringToBitboard(Binary);
+                case "K": WK+=convertStringToBitboard(BinaryStr);
                     break;
-                case "p": BP+=convertStringToBitboard(Binary);
+                case "p": BP+=convertStringToBitboard(BinaryStr);
                     break;
-                case "n": BN+=convertStringToBitboard(Binary);
+                case "n": BN+=convertStringToBitboard(BinaryStr);
                     break;
-                case "b": BB+=convertStringToBitboard(Binary);
+                case "b": BB+=convertStringToBitboard(BinaryStr);
                     break;
-                case "r": BR+=convertStringToBitboard(Binary);
+                case "r": BR+=convertStringToBitboard(BinaryStr);
                     break;
-                case "q": BQ+=convertStringToBitboard(Binary);
+                case "q": BQ+=convertStringToBitboard(BinaryStr);
                     break;
-                case "k": BK+=convertStringToBitboard(Binary);
+                case "k": BK+=convertStringToBitboard(BinaryStr);
                     break;
             }
         }
-        drawArray(WP,WN,WB,WR,WQ,WK,BP,BN,BB,BR,BQ,BK);
-        /*
-        UserInterface.WP=WP; UserInterface.WN=WN; UserInterface.WB=WB;
-        UserInterface.WR=WR; UserInterface.WQ=WQ; UserInterface.WK=WK;
-        UserInterface.BP=BP; UserInterface.BN=BN; UserInterface.BB=BB;
-        UserInterface.BR=BR; UserInterface.BQ=BQ; UserInterface.BK=BK;
 
-         */
+        drawArray(WP,WN,WB,WR,WQ,WK,BP,BN,BB,BR,BQ,BK);
     }
+
+    /** Converts String to bitboard. Java longs are signed so this method keeps it positive when converting to a long
+     *
+     * @param Binary the string to convert to a bitboard
+     * @return returns a long containing the bitboard
+     */
     public static long convertStringToBitboard(String Binary) {
-        if (Binary.charAt(0)=='0') {//not going to be a negative number
+        if (Binary.charAt(0)=='0') {
             return Long.parseLong(Binary, 2);
-        } else {
+        } else { //"remove" the signed bit
             return Long.parseLong("1"+Binary.substring(2), 2)*2;
+
         }
     }
+
+    /**
+     * draws the board based on the bitboards
+     *
+     * @param WP long representing white pawns positions
+     * @param WN long representing white knights positions
+     * @param WB long representing white bishops positions
+     * @param WR long representing white rooks positions
+     * @param WQ long representing white queen position
+     * @param WK long representing white king position
+     * @param BP long representing black pawns positions
+     * @param BN long representing black knights positions
+     * @param BB long representing black bishops positions
+     * @param BR long representing black rooks positions
+     * @param BQ long representing black queen position
+     * @param BK long representing black king position
+     */
     public static void drawArray(long WP,long WN,long WB,long WR,long WQ,long WK,long BP,long BN,long BB,long BR,long BQ,long BK) {
-        String chessBoard[][]=new String[8][8];
+        String[][] chessBoard =new String[8][8];
         for (int i=0;i<64;i++) {
             chessBoard[i/8][i%8]=" ";
         }
         for (int i=0;i<64;i++) {
+            //the bitwise operation ((LONG>>i)&1)==1) shifts the long to the "i" bit and checks if it's 1
+            // if it is then it adds the appropriate piece to the chessBoard
             if (((WP>>i)&1)==1) {chessBoard[i/8][i%8]="P";}
             if (((WN>>i)&1)==1) {chessBoard[i/8][i%8]="N";}
             if (((WB>>i)&1)==1) {chessBoard[i/8][i%8]="B";}
@@ -95,6 +139,28 @@ public class BoardGeneration {
             if (((BK>>i)&1)==1) {chessBoard[i/8][i%8]="k";}
         }
         for (int i=0;i<8;i++) {
+            System.out.println(Arrays.toString(chessBoard[i]));
+        }
+    }
+
+    /** This method draws the bitboard
+     *
+     * @param bitBoard long containing bitboard to draw
+     */
+    public static void drawBitboard(long bitBoard) {
+        String[][] chessBoard = new String[8][8];
+        for (int i = 0; i < 64; i++) {
+            chessBoard[i / 8][i % 8] = "";
+        }
+        for (int i = 0; i < 64; i++) {
+            if (((bitBoard >>> i) & 1) == 1) {
+                chessBoard[i / 8][i % 8] = "P";//P meaning piece
+            }
+            if ("".equals(chessBoard[i / 8][i % 8])) {
+                chessBoard[i / 8][i % 8] = " ";
+            }
+        }
+        for (int i = 0; i < 8; i++) {
             System.out.println(Arrays.toString(chessBoard[i]));
         }
     }
