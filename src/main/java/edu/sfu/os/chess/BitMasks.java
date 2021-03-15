@@ -2,7 +2,7 @@ package edu.sfu.os.chess;
 /**
  * Bit masks used for move generation.
  * */
-public class BoardBitMasks {
+public class BitMasks {
     static final long FILE_A = 72340172838076673L;
     static final long FILE_H = -9187201950435737472L;
     static final long FILE_AB = 217020518514230019L;

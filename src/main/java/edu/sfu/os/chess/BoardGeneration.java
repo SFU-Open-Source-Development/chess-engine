@@ -9,7 +9,7 @@ import java.util.*;
 
 public class BoardGeneration {
 
-    public static void initiateStandardChess() {
+    public static Board initiateStandardChess() {
 
         // Uppercase is WHITE and lowercase is BLACK
         String[][] chessBoard ={
@@ -22,55 +22,50 @@ public class BoardGeneration {
                 {"P","P","P","P","P","P","P","P"},
                 {"R","N","B","Q","K","B","N","R"}};
 
-        arrayToBitboards(chessBoard);
+        return arrayToBitboards(chessBoard);
     }
 
     /**
      * Initiates the the bitboards using the standard starting position.
      * @param chessBoard array of strings representing the chessboard.
-     * @return Nothing.
+     * @return bitboards the updated boards for the starting position.
      */
-    public static void arrayToBitboards(String[][] chessBoard) {
-        long WP=0L,WN=0L,WB=0L,WR=0L,WQ=0L,WK=0L,BP=0L,BN=0L,BB=0L,BR=0L,BQ=0L,BK=0L;// L just guarantees enough precision(64 bits)
+    public static Board arrayToBitboards(String[][] chessBoard) {
+        Board bitboards = new Board();
         String BinaryStr;
         for (int i=0;i<64;i++) {
             BinaryStr="0000000000000000000000000000000000000000000000000000000000000000";
             BinaryStr=BinaryStr.substring(i+1)+"1"+BinaryStr.substring(0, i); //moves the "1" one bit to the left with each iteration
             switch (chessBoard[i/8][i%8]) {
                 //since there should be no overlap we can add the longs individually with each bit representing a piece of that type
-                case "P": WP+=convertStringToBitboard(BinaryStr);
+                case "P": bitboards.WP+=convertStringToBitboard(BinaryStr);
                     break;
-                case "N": WN+=convertStringToBitboard(BinaryStr);
+                case "N": bitboards.WN+=convertStringToBitboard(BinaryStr);
                     break;
-                case "B": WB+=convertStringToBitboard(BinaryStr);
+                case "B": bitboards.WB+=convertStringToBitboard(BinaryStr);
                     break;
-                case "R": WR+=convertStringToBitboard(BinaryStr);
+                case "R": bitboards.WR+=convertStringToBitboard(BinaryStr);
                     break;
-                case "Q": WQ+=convertStringToBitboard(BinaryStr);
+                case "Q": bitboards.WQ+=convertStringToBitboard(BinaryStr);
                     break;
-                case "K": WK+=convertStringToBitboard(BinaryStr);
+                case "K": bitboards.WK+=convertStringToBitboard(BinaryStr);
                     break;
-                case "p": BP+=convertStringToBitboard(BinaryStr);
+                case "p": bitboards.BP+=convertStringToBitboard(BinaryStr);
                     break;
-                case "n": BN+=convertStringToBitboard(BinaryStr);
+                case "n": bitboards.BN+=convertStringToBitboard(BinaryStr);
                     break;
-                case "b": BB+=convertStringToBitboard(BinaryStr);
+                case "b": bitboards.BB+=convertStringToBitboard(BinaryStr);
                     break;
-                case "r": BR+=convertStringToBitboard(BinaryStr);
+                case "r": bitboards.BR+=convertStringToBitboard(BinaryStr);
                     break;
-                case "q": BQ+=convertStringToBitboard(BinaryStr);
+                case "q": bitboards.BQ+=convertStringToBitboard(BinaryStr);
                     break;
-                case "k": BK+=convertStringToBitboard(BinaryStr);
+                case "k": bitboards.BK+=convertStringToBitboard(BinaryStr);
                     break;
             }
         }
-
-        Engine.WP=WP; Engine.WN=WN; Engine.WB=WB;
-        Engine.WR=WR; Engine.WQ=WQ; Engine.WK=WK;
-        Engine.BP=BP; Engine.BN=BN; Engine.BB=BB;
-        Engine.BR=BR; Engine.BQ=BQ; Engine.BK=BK;
-
-        drawArray(WP,WN,WB,WR,WQ,WK,BP,BN,BB,BR,BQ,BK);
+        drawArray(bitboards);
+        return bitboards;
     }
 
     /**
@@ -88,21 +83,10 @@ public class BoardGeneration {
 
     /**
      * Draws the board position to stdout from the provided bit boards
-     * @param WP long representing white pawns positions
-     * @param WN long representing white knights positions
-     * @param WB long representing white bishops positions
-     * @param WR long representing white rooks positions
-     * @param WQ long representing white queen position
-     * @param WK long representing white king position
-     * @param BP long representing black pawns positions
-     * @param BN long representing black knights positions
-     * @param BB long representing black bishops positions
-     * @param BR long representing black rooks positions
-     * @param BQ long representing black queen position
-     * @param BK long representing black king position
+     * @param bitboards contains all the bitboards that reflect a chess position
      * @return Nothing.
      */
-    public static void drawArray(long WP,long WN,long WB,long WR,long WQ,long WK,long BP,long BN,long BB,long BR,long BQ,long BK) {
+    public static void drawArray(Board bitboards) {
         String[][] chessBoard =new String[8][8];
         for (int i=0;i<64;i++) {
             chessBoard[i/8][i%8]=" ";
@@ -110,18 +94,18 @@ public class BoardGeneration {
         for (int i=0;i<64;i++) {
             //the bitwise operation ((LONG>>i)&1)==1) shifts the long to the "i" bit and checks if it's 1
             // if it is then it adds the appropriate piece to the chessBoard
-            if (((WP>>i)&1)==1) {chessBoard[i/8][i%8]="P";}
-            if (((WN>>i)&1)==1) {chessBoard[i/8][i%8]="N";}
-            if (((WB>>i)&1)==1) {chessBoard[i/8][i%8]="B";}
-            if (((WR>>i)&1)==1) {chessBoard[i/8][i%8]="R";}
-            if (((WQ>>i)&1)==1) {chessBoard[i/8][i%8]="Q";}
-            if (((WK>>i)&1)==1) {chessBoard[i/8][i%8]="K";}
-            if (((BP>>i)&1)==1) {chessBoard[i/8][i%8]="p";}
-            if (((BN>>i)&1)==1) {chessBoard[i/8][i%8]="n";}
-            if (((BB>>i)&1)==1) {chessBoard[i/8][i%8]="b";}
-            if (((BR>>i)&1)==1) {chessBoard[i/8][i%8]="r";}
-            if (((BQ>>i)&1)==1) {chessBoard[i/8][i%8]="q";}
-            if (((BK>>i)&1)==1) {chessBoard[i/8][i%8]="k";}
+            if (((bitboards.WP>>i)&1)==1) {chessBoard[i/8][i%8]="P";}
+            if (((bitboards.WN>>i)&1)==1) {chessBoard[i/8][i%8]="N";}
+            if (((bitboards.WB>>i)&1)==1) {chessBoard[i/8][i%8]="B";}
+            if (((bitboards.WR>>i)&1)==1) {chessBoard[i/8][i%8]="R";}
+            if (((bitboards.WQ>>i)&1)==1) {chessBoard[i/8][i%8]="Q";}
+            if (((bitboards.WK>>i)&1)==1) {chessBoard[i/8][i%8]="K";}
+            if (((bitboards.BP>>i)&1)==1) {chessBoard[i/8][i%8]="p";}
+            if (((bitboards.BN>>i)&1)==1) {chessBoard[i/8][i%8]="n";}
+            if (((bitboards.BB>>i)&1)==1) {chessBoard[i/8][i%8]="b";}
+            if (((bitboards.BR>>i)&1)==1) {chessBoard[i/8][i%8]="r";}
+            if (((bitboards.BQ>>i)&1)==1) {chessBoard[i/8][i%8]="q";}
+            if (((bitboards.BK>>i)&1)==1) {chessBoard[i/8][i%8]="k";}
         }
         for (int i=0;i<8;i++) {
             System.out.println(Arrays.toString(chessBoard[i]));
@@ -130,16 +114,16 @@ public class BoardGeneration {
 
     /**
      * This method draws to stdout (for debugging purposes).
-     * @param bitBoard long containing bitboard to draw.
+     * @param bitboard long containing bitboard to draw.
      * @return Nothing.
      */
-    public static void drawBitboard(long bitBoard) {
+    public static void drawBitboard(long bitboard) {
         String[][] chessBoard = new String[8][8];
         for (int i = 0; i < 64; i++) {
             chessBoard[i / 8][i % 8] = "";
         }
         for (int i = 0; i < 64; i++) {
-            if (((bitBoard >>> i) & 1) == 1) {
+            if (((bitboard >>> i) & 1) == 1) {
                 chessBoard[i / 8][i % 8] = "P";//P meaning piece
             }
             if ("".equals(chessBoard[i / 8][i % 8])) {
