@@ -32,7 +32,7 @@ public class Moves {
 
         // moves
         long moveUpOne = WP>>8 & ~(BLACK_PIECES | WHITE_PIECES); // check for 1 step up
-        long moveUpTwo = (WP&WP_INITIAL)>>16 & ~(BLACK_PIECES | WHITE_PIECES) ; // check for 2 steps up
+        long moveUpTwo = (WP&WP_INITIAL)>>16 & ~((BLACK_PIECES | WHITE_PIECES) | ((BLACK_PIECES | WHITE_PIECES) << 8) ) ; // check for 2 steps up
         // En passant
         long enPassant = BP & (lastBP & BP_INITIAL) << 16;
         // Attacks
@@ -58,8 +58,6 @@ public class Moves {
             if((moveUpOne >> i & 1) == 1){
                 possibleMoves.add( //"up1:" +
                         "" + newFile + (newRank - 1) + newFile + (newRank) + promotion);
-
-
             }
             if((captureTopLeft >> i & 1) == 1){
                 possibleMoves.add( //"capLeft:" +
