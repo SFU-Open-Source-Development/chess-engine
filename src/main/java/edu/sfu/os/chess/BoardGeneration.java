@@ -2,22 +2,16 @@ package edu.sfu.os.chess;
 
 import java.util.*;
 /**
- * Uppercase letters are WHITE
- * pawn = P/p
- * kinght (horse) = N/n
- * bishop = B/b
- * rook (castle) = R/r
- * Queen = Q/q
- * King = K/k
+ * This class is instantiated once at the beginning of a new game.
  */
+
+// TODO: initiateStandardChessFEN by using the FEN class
+
 public class BoardGeneration {
-    /**
-     * This method passes an array of strings representing the standard chess board
-     * to the bitboard method
-     */
+
     public static void initiateStandardChess() {
-        long WP=0L,WN=0L,WB=0L,WR=0L,WQ=0L,WK=0L,BP=0L,BN=0L,BB=0L,BR=0L,BQ=0L,BK=0L;// L just guarantees enough precision(64 bits)
-        //the longs are the bitboards for each individual piece with 1's representing said piece and its location.
+
+        // Uppercase is WHITE and lowercase is BLACK
         String[][] chessBoard ={
                 {"r","n","b","q","k","b","n","r"},
                 {"p","p","p","p","p","p","p","p"},
@@ -27,30 +21,17 @@ public class BoardGeneration {
                 {" "," "," "," "," "," "," "," "},
                 {"P","P","P","P","P","P","P","P"},
                 {"R","N","B","Q","K","B","N","R"}};
-        arrayToBitboards(chessBoard,WP,WN,WB,WR,WQ,WK,BP,BN,BB,BR,BQ,BK);
-    }
-    public static void initiateChess960() {
-        //May do this later
+
+        arrayToBitboards(chessBoard);
     }
 
     /**
-     * Creates bit boards based on the passed array of strings
-     *
-     * @param chessBoard array of strings representing the chessboard
-     * @param WP long representing white pawns positions
-     * @param WN long representing white knights positions
-     * @param WB long representing white bishops positions
-     * @param WR long representing white rooks positions
-     * @param WQ long representing white queen position
-     * @param WK long representing white king position
-     * @param BP long representing black pawns positions
-     * @param BN long representing black knights positions
-     * @param BB long representing black bishops positions
-     * @param BR long representing black rooks positions
-     * @param BQ long representing black queen position
-     * @param BK long representing black king position
+     * Initiates the the bitboards using the standard starting position.
+     * @param chessBoard array of strings representing the chessboard.
+     * @return Nothing.
      */
-    public static void arrayToBitboards(String[][] chessBoard,long WP,long WN,long WB,long WR,long WQ,long WK,long BP,long BN,long BB,long BR,long BQ,long BK) {
+    public static void arrayToBitboards(String[][] chessBoard) {
+        long WP=0L,WN=0L,WB=0L,WR=0L,WQ=0L,WK=0L,BP=0L,BN=0L,BB=0L,BR=0L,BQ=0L,BK=0L;// L just guarantees enough precision(64 bits)
         String BinaryStr;
         for (int i=0;i<64;i++) {
             BinaryStr="0000000000000000000000000000000000000000000000000000000000000000";
@@ -84,26 +65,29 @@ public class BoardGeneration {
             }
         }
 
+        Engine.WP=WP; Engine.WN=WN; Engine.WB=WB;
+        Engine.WR=WR; Engine.WQ=WQ; Engine.WK=WK;
+        Engine.BP=BP; Engine.BN=BN; Engine.BB=BB;
+        Engine.BR=BR; Engine.BQ=BQ; Engine.BK=BK;
+
         drawArray(WP,WN,WB,WR,WQ,WK,BP,BN,BB,BR,BQ,BK);
     }
 
-    /** Converts String to bitboard. Java longs are signed so this method keeps it positive when converting to a long
-     *
+    /**
+     * Converts a binary string to a bitboard
      * @param Binary the string to convert to a bitboard
-     * @return returns a long containing the bitboard
+     * @return long containing the bitboard
      */
     public static long convertStringToBitboard(String Binary) {
         if (Binary.charAt(0)=='0') {
             return Long.parseLong(Binary, 2);
         } else { //"remove" the signed bit
             return Long.parseLong("1"+Binary.substring(2), 2)*2;
-
         }
     }
 
     /**
-     * draws the board based on the bitboards
-     *
+     * Draws the board position to stdout from the provided bit boards
      * @param WP long representing white pawns positions
      * @param WN long representing white knights positions
      * @param WB long representing white bishops positions
@@ -116,6 +100,7 @@ public class BoardGeneration {
      * @param BR long representing black rooks positions
      * @param BQ long representing black queen position
      * @param BK long representing black king position
+     * @return Nothing.
      */
     public static void drawArray(long WP,long WN,long WB,long WR,long WQ,long WK,long BP,long BN,long BB,long BR,long BQ,long BK) {
         String[][] chessBoard =new String[8][8];
@@ -143,9 +128,10 @@ public class BoardGeneration {
         }
     }
 
-    /** This method draws the bitboard
-     *
-     * @param bitBoard long containing bitboard to draw
+    /**
+     * This method draws to stdout (for debugging purposes).
+     * @param bitBoard long containing bitboard to draw.
+     * @return Nothing.
      */
     public static void drawBitboard(long bitBoard) {
         String[][] chessBoard = new String[8][8];
