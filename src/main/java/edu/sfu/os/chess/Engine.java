@@ -1,5 +1,9 @@
 package edu.sfu.os.chess;
 
+import java.util.List;
+
+import static edu.sfu.os.chess.Moves.generateMovesPW;
+
 /**
  * Entry point for the engine.
  *
