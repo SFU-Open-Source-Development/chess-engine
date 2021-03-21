@@ -1,19 +1,18 @@
 package edu.sfu.os.chess;
 
 import java.util.*;
-/*
- * PIECE=WHITE/black
- * pawn=P/p
- * kinght (horse)=N/n
- * bishop=B/b
- * rook (castle)=R/r
- * Queen=Q/q
- * King=K/k
+/**
+ * This class is instantiated once at the beginning of a new game.
  */
+
+// TODO: initiateStandardChessFEN by using the FEN class
+
 public class BoardGeneration {
-    public static void initiateStandardChess() {
-        long WP=0L,WN=0L,WB=0L,WR=0L,WQ=0L,WK=0L,BP=0L,BN=0L,BB=0L,BR=0L,BQ=0L,BK=0L;
-        String chessBoard[][]={
+
+    public static Board initiateStandardChess() {
+
+        // Uppercase is WHITE and lowercase is BLACK
+        String[][] chessBoard ={
                 {"r","n","b","q","k","b","n","r"},
                 {"p","p","p","p","p","p","p","p"},
                 {" "," "," "," "," "," "," "," "},
@@ -22,79 +21,116 @@ public class BoardGeneration {
                 {" "," "," "," "," "," "," "," "},
                 {"P","P","P","P","P","P","P","P"},
                 {"R","N","B","Q","K","B","N","R"}};
-        arrayToBitboards(chessBoard,WP,WN,WB,WR,WQ,WK,BP,BN,BB,BR,BQ,BK);
+
+        return arrayToBitboards(chessBoard);
     }
-    public static void initiateChess960() {
-        //May do this later
-    }
-    public static void arrayToBitboards(String[][] chessBoard,long WP,long WN,long WB,long WR,long WQ,long WK,long BP,long BN,long BB,long BR,long BQ,long BK) {
-        String Binary;
+
+    /**
+     * Initiates the the bitboards using the standard starting position.
+     * @param chessBoard array of strings representing the chessboard.
+     * @return bitboards the updated boards for the starting position.
+     */
+    public static Board arrayToBitboards(String[][] chessBoard) {
+        Board bitboards = new Board();
+        String BinaryStr;
         for (int i=0;i<64;i++) {
-            Binary="0000000000000000000000000000000000000000000000000000000000000000";
-            Binary=Binary.substring(i+1)+"1"+Binary.substring(0, i);
+            BinaryStr="0000000000000000000000000000000000000000000000000000000000000000";
+            BinaryStr=BinaryStr.substring(i+1)+"1"+BinaryStr.substring(0, i); //moves the "1" one bit to the left with each iteration
             switch (chessBoard[i/8][i%8]) {
-                case "P": WP+=convertStringToBitboard(Binary);
+                //since there should be no overlap we can add the longs individually with each bit representing a piece of that type
+                case "P": bitboards.WP+=convertStringToBitboard(BinaryStr);
                     break;
-                case "N": WN+=convertStringToBitboard(Binary);
+                case "N": bitboards.WN+=convertStringToBitboard(BinaryStr);
                     break;
-                case "B": WB+=convertStringToBitboard(Binary);
+                case "B": bitboards.WB+=convertStringToBitboard(BinaryStr);
                     break;
-                case "R": WR+=convertStringToBitboard(Binary);
+                case "R": bitboards.WR+=convertStringToBitboard(BinaryStr);
                     break;
-                case "Q": WQ+=convertStringToBitboard(Binary);
+                case "Q": bitboards.WQ+=convertStringToBitboard(BinaryStr);
                     break;
-                case "K": WK+=convertStringToBitboard(Binary);
+                case "K": bitboards.WK+=convertStringToBitboard(BinaryStr);
                     break;
-                case "p": BP+=convertStringToBitboard(Binary);
+                case "p": bitboards.BP+=convertStringToBitboard(BinaryStr);
                     break;
-                case "n": BN+=convertStringToBitboard(Binary);
+                case "n": bitboards.BN+=convertStringToBitboard(BinaryStr);
                     break;
-                case "b": BB+=convertStringToBitboard(Binary);
+                case "b": bitboards.BB+=convertStringToBitboard(BinaryStr);
                     break;
-                case "r": BR+=convertStringToBitboard(Binary);
+                case "r": bitboards.BR+=convertStringToBitboard(BinaryStr);
                     break;
-                case "q": BQ+=convertStringToBitboard(Binary);
+                case "q": bitboards.BQ+=convertStringToBitboard(BinaryStr);
                     break;
-                case "k": BK+=convertStringToBitboard(Binary);
+                case "k": bitboards.BK+=convertStringToBitboard(BinaryStr);
                     break;
             }
         }
-        drawArray(WP,WN,WB,WR,WQ,WK,BP,BN,BB,BR,BQ,BK);
-        /*
-        UserInterface.WP=WP; UserInterface.WN=WN; UserInterface.WB=WB;
-        UserInterface.WR=WR; UserInterface.WQ=WQ; UserInterface.WK=WK;
-        UserInterface.BP=BP; UserInterface.BN=BN; UserInterface.BB=BB;
-        UserInterface.BR=BR; UserInterface.BQ=BQ; UserInterface.BK=BK;
-
-         */
+        drawArray(bitboards);
+        return bitboards;
     }
+
+    /**
+     * Converts a binary string to a bitboard
+     * @param Binary the string to convert to a bitboard
+     * @return long containing the bitboard
+     */
     public static long convertStringToBitboard(String Binary) {
-        if (Binary.charAt(0)=='0') {//not going to be a negative number
+        if (Binary.charAt(0)=='0') {
             return Long.parseLong(Binary, 2);
-        } else {
+        } else { //"remove" the signed bit
             return Long.parseLong("1"+Binary.substring(2), 2)*2;
         }
     }
-    public static void drawArray(long WP,long WN,long WB,long WR,long WQ,long WK,long BP,long BN,long BB,long BR,long BQ,long BK) {
-        String chessBoard[][]=new String[8][8];
+
+    /**
+     * Draws the board position to stdout from the provided bit boards
+     * @param bitboards contains all the bitboards that reflect a chess position
+     * @return Nothing.
+     */
+    public static void drawArray(Board bitboards) {
+        String[][] chessBoard =new String[8][8];
         for (int i=0;i<64;i++) {
             chessBoard[i/8][i%8]=" ";
         }
         for (int i=0;i<64;i++) {
-            if (((WP>>i)&1)==1) {chessBoard[i/8][i%8]="P";}
-            if (((WN>>i)&1)==1) {chessBoard[i/8][i%8]="N";}
-            if (((WB>>i)&1)==1) {chessBoard[i/8][i%8]="B";}
-            if (((WR>>i)&1)==1) {chessBoard[i/8][i%8]="R";}
-            if (((WQ>>i)&1)==1) {chessBoard[i/8][i%8]="Q";}
-            if (((WK>>i)&1)==1) {chessBoard[i/8][i%8]="K";}
-            if (((BP>>i)&1)==1) {chessBoard[i/8][i%8]="p";}
-            if (((BN>>i)&1)==1) {chessBoard[i/8][i%8]="n";}
-            if (((BB>>i)&1)==1) {chessBoard[i/8][i%8]="b";}
-            if (((BR>>i)&1)==1) {chessBoard[i/8][i%8]="r";}
-            if (((BQ>>i)&1)==1) {chessBoard[i/8][i%8]="q";}
-            if (((BK>>i)&1)==1) {chessBoard[i/8][i%8]="k";}
+            //the bitwise operation ((LONG>>i)&1)==1) shifts the long to the "i" bit and checks if it's 1
+            // if it is then it adds the appropriate piece to the chessBoard
+            if (((bitboards.WP>>i)&1)==1) {chessBoard[i/8][i%8]="P";}
+            if (((bitboards.WN>>i)&1)==1) {chessBoard[i/8][i%8]="N";}
+            if (((bitboards.WB>>i)&1)==1) {chessBoard[i/8][i%8]="B";}
+            if (((bitboards.WR>>i)&1)==1) {chessBoard[i/8][i%8]="R";}
+            if (((bitboards.WQ>>i)&1)==1) {chessBoard[i/8][i%8]="Q";}
+            if (((bitboards.WK>>i)&1)==1) {chessBoard[i/8][i%8]="K";}
+            if (((bitboards.BP>>i)&1)==1) {chessBoard[i/8][i%8]="p";}
+            if (((bitboards.BN>>i)&1)==1) {chessBoard[i/8][i%8]="n";}
+            if (((bitboards.BB>>i)&1)==1) {chessBoard[i/8][i%8]="b";}
+            if (((bitboards.BR>>i)&1)==1) {chessBoard[i/8][i%8]="r";}
+            if (((bitboards.BQ>>i)&1)==1) {chessBoard[i/8][i%8]="q";}
+            if (((bitboards.BK>>i)&1)==1) {chessBoard[i/8][i%8]="k";}
         }
         for (int i=0;i<8;i++) {
+            System.out.println(Arrays.toString(chessBoard[i]));
+        }
+    }
+
+    /**
+     * This method draws to stdout (for debugging purposes).
+     * @param bitboard long containing bitboard to draw.
+     * @return Nothing.
+     */
+    public static void drawBitboard(long bitboard) {
+        String[][] chessBoard = new String[8][8];
+        for (int i = 0; i < 64; i++) {
+            chessBoard[i / 8][i % 8] = "";
+        }
+        for (int i = 0; i < 64; i++) {
+            if (((bitboard >>> i) & 1) == 1) {
+                chessBoard[i / 8][i % 8] = "P";//P meaning piece
+            }
+            if ("".equals(chessBoard[i / 8][i % 8])) {
+                chessBoard[i / 8][i % 8] = " ";
+            }
+        }
+        for (int i = 0; i < 8; i++) {
             System.out.println(Arrays.toString(chessBoard[i]));
         }
     }
