@@ -95,4 +95,193 @@ public class Moves {
         return possibleMoves;
     }
 
+    public static List<String> generateMovesNW(long lastBP,Board currentPosition) {
+        // Retrieve bitmap from Board;
+        long WP = currentPosition.WP;
+        long WN = currentPosition.WN;
+        long WB = currentPosition.WB;
+        long WR = currentPosition.WR;
+        long WQ = currentPosition.WQ;
+        long WK = currentPosition.WK;
+
+        final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
+
+        List<String> possibleMoves = new ArrayList<>();
+
+        long[] knightMoves = new long[8];
+
+        /*  * 8 * 0 *
+            7 * * * 1
+            * * N * *
+            6 * * * 2
+            * 5 * 4 *
+         */
+
+        knightMoves[0] = WN >> 15 & ~(WHITE_PIECES | BitMasks.FILE_A);
+        knightMoves[1] = WN >> 6 & ~(WHITE_PIECES | BitMasks.FILE_AB);
+        knightMoves[2] = WN << 10 & ~(WHITE_PIECES | BitMasks.FILE_AB);
+        knightMoves[3] = WN << 17 & ~(WHITE_PIECES | BitMasks.FILE_A);
+        knightMoves[4] = WN << 15 & ~(WHITE_PIECES | BitMasks.FILE_H);
+        knightMoves[5] = WN << 6 & ~(WHITE_PIECES | BitMasks.FILE_GH);
+        knightMoves[6] = WN >> 10 & ~(WHITE_PIECES | BitMasks.FILE_H);
+        knightMoves[7] = WN >> 17 & ~(WHITE_PIECES | BitMasks.FILE_GH);
+
+        for (int i = 0; i < 64; i++) {
+            char newFile = (char)('a' + i % 8);
+            int newRank = 8 - i/8;
+
+            for(int j = 0; j < 8; j++) {
+                switch (j) {
+                    case 0:
+                        if ((knightMoves[j] >> i & 1) == 1) {
+                            possibleMoves.add(
+                                    "" + (char)(newFile - 1) + (newRank - 2) + newFile + newRank);
+                        }
+                        break;
+                    case 1:
+                        if ((knightMoves[j] >> i & 1) == 1) {
+                            possibleMoves.add(
+                                    "" + (char)(newFile - 2) + (newRank - 1) + newFile + newRank);
+                        }
+                        break;
+                    case 2:
+                        if ((knightMoves[j] >> i & 1) == 1) {
+                            possibleMoves.add(
+                                    "" + (char)(newFile - 2) + (newRank + 1) + newFile + newRank);
+                        }
+                        break;
+                    case 3:
+                        if ((knightMoves[j] >> i & 1) == 1) {
+                            possibleMoves.add(
+                                    "" + (char)(newFile - 1) + (newRank + 2) + newFile + newRank);
+                        }
+                        break;
+                    case 4:
+                        if ((knightMoves[j] >> i & 1) == 1) {
+                            possibleMoves.add(
+                                    "" + (char)(newFile + 1) + (newRank + 2) + newFile + newRank);
+                        }
+                        break;
+                    case 5:
+                        if ((knightMoves[j] >> i & 1) == 1) {
+                            possibleMoves.add(
+                                    "" + (char)(newFile + 2) + (newRank + 1) + newFile + newRank);
+                        }
+                        break;
+                    case 6:
+                        if ((knightMoves[j] >> i & 1) == 1) {
+                            possibleMoves.add(
+                                    "" + (char)(newFile + 2) + (newRank - 1) + newFile + newRank);
+                        }
+                        break;
+                    case 7:
+                        if ((knightMoves[j] >> i & 1) == 1) {
+                            possibleMoves.add(
+                                    "" + (char)(newFile + 1) + (newRank - 2) + newFile + newRank);
+                        }
+                        break;
+                }
+            }
+        }
+
+        return possibleMoves;
+    }
+
+    public static List<String> generateMovesKW(long lastBP,Board currentPosition) {
+        // Retrieve bitmap from Board;
+        long BP = currentPosition.BP;
+        long BN = currentPosition.BN;
+        long BB = currentPosition.BB;
+        long BR = currentPosition.BR;
+        long BQ = currentPosition.BQ;
+        long BK = currentPosition.BK;
+        long WP = currentPosition.WP;
+        long WN = currentPosition.WN;
+        long WB = currentPosition.WB;
+        long WR = currentPosition.WR;
+        long WQ = currentPosition.WQ;
+        long WK = currentPosition.WK;
+
+        // KING NOT INCLUDED
+        final long WHITE_PIECES = WP | WN | WB | WR | WQ; // White's current pieces position
+
+        List<String> possibleMoves = new ArrayList<>();
+
+        long[] kingMoves = new long[8];
+
+        /*
+            0 1 2
+            3 K 4
+            5 6 7
+         */
+
+        kingMoves[0] = WK >> 9 & ~(WHITE_PIECES | BitMasks.FILE_H);
+        kingMoves[1] = WK >> 8 & ~(WHITE_PIECES);
+        kingMoves[2] = WK >> 7 & ~(WHITE_PIECES | BitMasks.FILE_A);
+        kingMoves[3] = WK >> 1 & ~(WHITE_PIECES | BitMasks.FILE_H);
+        kingMoves[4] = WK << 1 & ~(WHITE_PIECES | BitMasks.FILE_A);
+        kingMoves[5] = WK << 7 & ~(WHITE_PIECES | BitMasks.FILE_H);
+        kingMoves[6] = WK << 8 & ~(WHITE_PIECES);
+        kingMoves[7] = WK << 9 & ~(WHITE_PIECES | BitMasks.FILE_A);
+
+        for (int i = 0; i < 64; i++) {
+            char newFile = (char)('a' + i % 8);
+            int newRank = 8 - i/8;
+
+            for(int j = 0; j < 8; j++) {
+                switch (j) {
+                    case 0:
+                        if ((kingMoves[j] >> i & 1) == 1) {
+                            possibleMoves.add(
+                                    "" + (char)(newFile + 1) + (newRank - 1) + newFile + newRank);
+                        }
+                        break;
+                    case 1:
+                        if ((kingMoves[j] >> i & 1) == 1) {
+                            possibleMoves.add(
+                                    "" + newFile + (newRank - 1) + newFile + newRank);
+                        }
+                        break;
+                    case 2:
+                        if ((kingMoves[j] >> i & 1) == 1) {
+                            possibleMoves.add(
+                                    "" + (char)(newFile - 1) + (newRank - 1) + newFile + newRank);
+                        }
+                        break;
+                    case 3:
+                        if ((kingMoves[j] >> i & 1) == 1) {
+                            possibleMoves.add(
+                                    "" + (char)(newFile + 1) + newRank + newFile + newRank);
+                        }
+                        break;
+                    case 4:
+                        if ((kingMoves[j] >> i & 1) == 1) {
+                            possibleMoves.add(
+                                    "" + (char)(newFile - 1) + newRank + newFile + newRank);
+                        }
+                        break;
+                    case 5:
+                        if ((kingMoves[j] >> i & 1) == 1) {
+                            possibleMoves.add(
+                                    "" + (char)(newFile + 1) + (newRank + 1) + newFile + newRank);
+                        }
+                        break;
+                    case 6:
+                        if ((kingMoves[j] >> i & 1) == 1) {
+                            possibleMoves.add(
+                                    "" + newFile + (newRank + 1) + newFile + newRank);
+                        }
+                        break;
+                    case 7:
+                        if ((kingMoves[j] >> i & 1) == 1) {
+                            possibleMoves.add(
+                                    "" + (char)(newFile - 1) + (newRank + 1) + newFile + newRank);
+                        }
+                        break;
+                }
+            }
+        }
+
+        return possibleMoves;
+    }
 }
