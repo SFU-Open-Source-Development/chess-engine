@@ -1,7 +1,5 @@
 package edu.sfu.os.chess;
 
-import java.util.Arrays;
-
 /** FENParser is a class that parses FEN strings into bitboards.
  * Since bitboards has not been implemented, most of FENParser methods are place holder.
  */
@@ -10,7 +8,7 @@ public class FENParser {
      * 0 Wpawn, 1 Wknight, 2 Wbishop, 3 Wrook, 4 Wqueen, 5 Wking, 6 Bpawn, 7 Bknight, 8 Bbishop,
      * 9 Brook, 10 Bqueen, 11 Bking.
      */
-    private long[] bitBoards = new long[12];
+    private Board bitboards = new Board();
     private int halfmoveClock;
     private int fullmoveCounter;
     private String currentMove;
@@ -48,18 +46,18 @@ public class FENParser {
                 binary = binary.substring(currentBits+1) + "1" + binary.substring(0, currentBits);
                 switch (s.charAt(i)) {
                     case '1', '2', '3', '4', '5', '6', '7', '8' -> currentBits += Character.getNumericValue(s.charAt(i)) - 1;
-                    case 'P' -> bitBoards[0] += convertStringToBitboard(binary);
-                    case 'N' -> bitBoards[1] += convertStringToBitboard(binary);
-                    case 'B' -> bitBoards[2] += convertStringToBitboard(binary);
-                    case 'R' -> bitBoards[3] += convertStringToBitboard(binary);
-                    case 'Q' -> bitBoards[4] += convertStringToBitboard(binary);
-                    case 'K' -> bitBoards[5] += convertStringToBitboard(binary);
-                    case 'p' -> bitBoards[6] += convertStringToBitboard(binary);
-                    case 'n' -> bitBoards[7] += convertStringToBitboard(binary);
-                    case 'b' -> bitBoards[8] += convertStringToBitboard(binary);
-                    case 'r' -> bitBoards[9] += convertStringToBitboard(binary);
-                    case 'q' -> bitBoards[10] += convertStringToBitboard(binary);
-                    case 'k' -> bitBoards[11] += convertStringToBitboard(binary);
+                    case 'P' -> bitboards.WP += convertStringToBitboard(binary);
+                    case 'N' -> bitboards.WN += convertStringToBitboard(binary);
+                    case 'B' -> bitboards.WB += convertStringToBitboard(binary);
+                    case 'R' -> bitboards.WR += convertStringToBitboard(binary);
+                    case 'Q' -> bitboards.WQ += convertStringToBitboard(binary);
+                    case 'K' -> bitboards.WK += convertStringToBitboard(binary);
+                    case 'p' -> bitboards.BP += convertStringToBitboard(binary);
+                    case 'n' -> bitboards.BN += convertStringToBitboard(binary);
+                    case 'b' -> bitboards.BB += convertStringToBitboard(binary);
+                    case 'r' -> bitboards.BR += convertStringToBitboard(binary);
+                    case 'q' -> bitboards.BQ += convertStringToBitboard(binary);
+                    case 'k' -> bitboards.BK += convertStringToBitboard(binary);
                 }
                 currentBits++;
             }
@@ -88,34 +86,6 @@ public class FENParser {
         }
     }
 
-    /** drawArray visualizes the generated bit board. Will be removed when bit board is implemented
-     */
-    public String[] drawArray() {
-        String[][] createdChessBoard = new String[8][8];
-        String[] finalChessBoard = new String[8];
-        for (int i=0;i<64;i++) {
-            createdChessBoard[i/8][i%8]=" ";
-        }
-        for (int i=0;i<64;i++) {
-            if (((bitBoards[0]>>i)&1)==1) {createdChessBoard[i/8][i%8]="P";}
-            if (((bitBoards[1]>>i)&1)==1) {createdChessBoard[i/8][i%8]="N";}
-            if (((bitBoards[2]>>i)&1)==1) {createdChessBoard[i/8][i%8]="B";}
-            if (((bitBoards[3]>>i)&1)==1) {createdChessBoard[i/8][i%8]="R";}
-            if (((bitBoards[4]>>i)&1)==1) {createdChessBoard[i/8][i%8]="Q";}
-            if (((bitBoards[5]>>i)&1)==1) {createdChessBoard[i/8][i%8]="K";}
-            if (((bitBoards[6]>>i)&1)==1) {createdChessBoard[i/8][i%8]="p";}
-            if (((bitBoards[7]>>i)&1)==1) {createdChessBoard[i/8][i%8]="n";}
-            if (((bitBoards[8]>>i)&1)==1) {createdChessBoard[i/8][i%8]="b";}
-            if (((bitBoards[9]>>i)&1)==1) {createdChessBoard[i/8][i%8]="r";}
-            if (((bitBoards[10]>>i)&1)==1) {createdChessBoard[i/8][i%8]="q";}
-            if (((bitBoards[11]>>i)&1)==1) {createdChessBoard[i/8][i%8]="k";}
-        }
-        for (int i=0;i<8;i++) {
-            finalChessBoard[i] =  Arrays.toString(createdChessBoard[i]);
-        }
-        return finalChessBoard;
-    }
-
     /** convertStringToBitboard convert binary string to unsigned long value
      * @param binary long value in binary string form
      * @return unsigned long value
@@ -128,8 +98,8 @@ public class FENParser {
         }
     }
 
-    public long[] getBitBoards() {
-        return bitBoards;
+    public Board getBitboards() {
+        return bitboards;
     }
 
     public int getHalfmoveClock() {

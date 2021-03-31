@@ -13,10 +13,21 @@ public class FENParserTest {
     public void testBitBoards1(){
         String fenString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         FENParser parser = new FENParser(fenString);
-        long[] bitBoards = parser.getBitBoards();
+        Board bitboards = parser.getBitboards();
+        assertEquals(71776119061217280L,bitboards.WP);
+        assertEquals(4755801206503243776L,bitboards.WN);
+        assertEquals(2594073385365405696L,bitboards.WB);
+        assertEquals(-9151314442816847872L,bitboards.WR);
+        assertEquals(576460752303423488L, bitboards.WQ);
+        assertEquals(1152921504606846976L,bitboards.WK);
+        assertEquals(65280,bitboards.BP);
+        assertEquals(66,bitboards.BN);
+        assertEquals(36,bitboards.BB);
+        assertEquals(129,bitboards.BR);
+        assertEquals(8, bitboards.BQ);
+        assertEquals(16,bitboards.BK);
         long[] expectedBitBoards = {71776119061217280L, 4755801206503243776L, 2594073385365405696L, -9151314442816847872L
                 , 576460752303423488L, 1152921504606846976L, 65280, 66, 36, 129, 8, 16 };
-        assertArrayEquals(expectedBitBoards,bitBoards);
     }
 
     @Test
@@ -71,10 +82,21 @@ public class FENParserTest {
     public void testBitBoard2(){
         String fenString = "b1k2rn1/4q3/3p4/p4p2/2P2P1R/PRBP2N1/4PK2/2Q5 b - f4 10 30";
         FENParser parser = new FENParser(fenString);
-        long[] bitBoards = parser.getBitBoards();
+        Board bitboards = parser.getBitboards();
+        assertEquals(4513649850843136L,bitboards.WP);
+        assertEquals(70368744177664L,bitboards.WN);
+        assertEquals(4398046511104L,bitboards.WB);
+        assertEquals(2748779069440L,bitboards.WR);
+        assertEquals(288230376151711744L, bitboards.WQ);
+        assertEquals(9007199254740992L,bitboards.WK);
+        assertEquals(554172416,bitboards.BP);
+        assertEquals(64,bitboards.BN);
+        assertEquals(1,bitboards.BB);
+        assertEquals(32,bitboards.BR);
+        assertEquals(4096, bitboards.BQ);
+        assertEquals(4,bitboards.BK);
         long[] expectedBitBoards = {4513649850843136L, 70368744177664L, 4398046511104L, 2748779069440L
                 , 288230376151711744L, 9007199254740992L, 554172416, 64, 1, 32, 4096, 4 };
-        assertArrayEquals(bitBoards,expectedBitBoards);
     }
 
     @Test
@@ -123,19 +145,5 @@ public class FENParserTest {
 
         String enPassant = parser.getEnPassant();
         assertEquals("f4",enPassant);
-    }
-
-    @Test
-    public void testDrawArray() {
-        String fenString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-        FENParser parser = new FENParser(fenString);
-        String[] draw = parser.drawArray();
-        String[] expectedDraw = {"[r, n, b, q, k, b, n, r]","[p, p, p, p, p, p, p, p]","[ ,  ,  ,  ,  ,  ,  ,  ]"
-                ,"[ ,  ,  ,  ,  ,  ,  ,  ]", "[ ,  ,  ,  ,  ,  ,  ,  ]", "[ ,  ,  ,  ,  ,  ,  ,  ]"
-                , "[P, P, P, P, P, P, P, P]", "[R, N, B, Q, K, B, N, R]"};
-        for (int i = 0; i < 8; i++) {
-            System.out.println(draw[i]);
-        }
-        assertArrayEquals(expectedDraw,draw);
     }
 }
