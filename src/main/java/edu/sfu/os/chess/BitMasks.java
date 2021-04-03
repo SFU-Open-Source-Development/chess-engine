@@ -1,4 +1,6 @@
 package edu.sfu.os.chess;
+
+
 /**
  * Bit masks used for move generation.
  * */
@@ -13,4 +15,35 @@ public class BitMasks {
     static final long RANK_8 = 255L;
     static final long CENTRE = 103481868288L;
     static final long EXTENDED_CENTRE = 66229406269440L;
+
+    static private long[] FILE_LOOKUP;
+
+    public static int getIndexFromBitboard(long bitboard){
+        // There might be a cheaper way:
+        // we could first initialize a lookup array / hash /? that maps bitboards onto indices
+
+        // takes in a bitboard containing 1 single bit and return's it's position on the bitboard
+        int index = 0;
+
+        while(index < 64 && (1L << index != bitboard)){
+            index ++;
+        }
+
+        return index;
+    }
+
+    public static int getRankFromBitboard(long bitboard){
+        // takes in a bitboard containing 1 single bit and return's it's Rank on the bitboard
+        int index = getIndexFromBitboard(bitboard);
+        return index / 8 + 1;
+    }
+
+    public static int getFileFromBitboard(long bitboard){
+        // takes in a bitboard containing 1 single bit and return's it's File on the bitboard
+        // where
+        // a = 1, h = 8
+        int index = getIndexFromBitboard(bitboard);
+        return index % 8 + 1;
+    }
+
 }

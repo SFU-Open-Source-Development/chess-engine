@@ -95,6 +95,41 @@ public class Moves {
         return possibleMoves;
     }
 
+    public static List<String> generateMovesWR(Board currentPosition){
+        // Retrieve bitmap from Board;
+        long BP = currentPosition.BP;
+        long BN = currentPosition.BN;
+        long BB = currentPosition.BB;
+        long BR = currentPosition.BR;
+        long BQ = currentPosition.BQ;
+        long BK = currentPosition.BK;
+        long WP = currentPosition.WP;
+        long WN = currentPosition.WN;
+        long WB = currentPosition.WB;
+        long WR = currentPosition.WR;
+        long WQ = currentPosition.WQ;
+        long WK = currentPosition.WK;
+
+        final long ALL_PIECES = BP | BN | BB | BR | BQ | BK | WP | WN | WB | WR | WQ | WK;
+        final long BLACK_PIECES = BP | BN | BB | BR | BQ | BK; // Black's current pieces position
+        final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
+        /*
+            reference: https://www.youtube.com/watch?v=bCH4YK6oq8M&ab_channel=LogicCrazyChess
+            occupied=11000101
+            slider=00000100
+            o-s=11000001
+            o-2s=10111101
+            left=o^(o-2s)=01111000
+        */
+
+        long testLong = ALL_PIECES;
+        System.out.println("====");
+        BoardGeneration.drawBitboard(BitMasks.FILE_A);
+
+
+        return null;
+    }
+
     public static List<String> generateMovesNW(long lastBP,Board currentPosition) {
         // Retrieve bitmap from Board;
         long WP = currentPosition.WP;
