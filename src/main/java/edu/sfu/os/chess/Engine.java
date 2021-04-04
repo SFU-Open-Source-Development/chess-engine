@@ -32,8 +32,8 @@ public class Engine
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
 
-       // List<String> arr = Moves.generateMovesWR(currentPosition);
-
+        List<String> arr = Moves.generateMovesWR(currentPosition);
+        System.out.println(arr);
         //System.out.println(String.join(", ", arr));
     }
 }

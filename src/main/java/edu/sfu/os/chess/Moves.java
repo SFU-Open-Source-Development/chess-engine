@@ -113,21 +113,66 @@ public class Moves {
         final long ALL_PIECES = BP | BN | BB | BR | BQ | BK | WP | WN | WB | WR | WQ | WK;
         final long BLACK_PIECES = BP | BN | BB | BR | BQ | BK; // Black's current pieces position
         final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
+
+        List<String> possibleMoves = new ArrayList<>();
         /*
             reference: https://www.youtube.com/watch?v=bCH4YK6oq8M&ab_channel=LogicCrazyChess
-            occupied=11000101
-            slider=00000100
+
+            ========= The Trick ===========
+            occupied=11000101 as (o)
+            slider=00000100   as (s)
             o-s=11000001
-            o-2s=10111101
+            o-2s=10111101     // equals to shifting to left by 1
             left=o^(o-2s)=01111000
+            ===============================
+
+            Combining left and right
+            lineAttacks=(((o&m)-2s) ^ ((o&m)'-2s')')&m
         */
+        int index = BitMasks.getIndexFromBitboard(WR);
+        if(index > 64){
+            return possibleMoves;
+        }
+        /*
+        boolean hasRook = true;
+        while(hasRook){
 
-        long testLong = ALL_PIECES;
-        System.out.println("====");
-        BoardGeneration.drawBitboard(BitMasks.FILE_A);
+        }*/
+        int rank = BitMasks.getRankFromBitboard(WR);
+        int file = BitMasks.getFileFromBitboard(WR);
+        long rankMask = BitMasks.RANK_8 << ((rank - 1) * 8);
+        long fileMask = BitMasks.FILE_A << (file - 1);
 
+        long firstRook = 1L << index;
+        long firstRookReversed = BitMasks.reverse64bits(firstRook);
 
-        return null;
+        // search Horizontally / in the Rank
+        long occupiedRank = ALL_PIECES & rankMask;
+        long occupiedRankReversed = BitMasks.reverse64bits(occupiedRank);
+        long horizontalAttack = ((occupiedRank - (2 * firstRook)) ^ BitMasks.reverse64bits(occupiedRankReversed - 2 * firstRookReversed)) & rankMask ;
+        // search Vertically / in the File
+        long occupiedFile = ALL_PIECES & fileMask;
+        long occupiedFileReversed = BitMasks.reverse64bits(occupiedFile);
+        long VerticalAttack = ((occupiedFile - (2 * firstRook)) ^ BitMasks.reverse64bits(occupiedFileReversed - 2 * firstRookReversed)) & fileMask ;
+
+        long attacks = horizontalAttack | VerticalAttack;
+
+        System.out.println("===");
+        BoardGeneration.drawBitboard(WR);
+        System.out.println("===");
+        BoardGeneration.drawBitboard(attacks);
+
+        for (int i = 0; i < 64; i++) {
+            char newFile = (char)('a' + i % 8);
+            int newRank = 8 - i/8;
+
+            if((attacks >> i & 1) == 1){
+                possibleMoves.add(
+                        "" + (char)('a' + file - 1) + (9 - rank) + newFile + (newRank));
+            }
+        }
+
+        return possibleMoves;
     }
 
     public static List<String> generateMovesNW(long lastBP,Board currentPosition) {
