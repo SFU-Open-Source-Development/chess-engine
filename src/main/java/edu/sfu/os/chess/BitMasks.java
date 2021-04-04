@@ -26,7 +26,7 @@ public class BitMasks {
     public static int getIndexFromBitboard(long bitboard){
         // There might be a cheaper way:
         // we could first initialize a lookup array / hash /? that maps bitboards onto indices
-
+        // todo: possible upgrade to Long numoftrailingzeros
         int index = 0;
 
         while(index < 64 && (1L << index != bitboard)){

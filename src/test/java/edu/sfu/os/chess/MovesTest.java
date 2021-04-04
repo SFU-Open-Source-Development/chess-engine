@@ -71,4 +71,11 @@ public class MovesTest {
         System.out.println(String.join(", ", arr));
 
     }
+
+    @Test
+    public void testGenerateMovesRookWhite(){
+
+
+
+    }
 }
