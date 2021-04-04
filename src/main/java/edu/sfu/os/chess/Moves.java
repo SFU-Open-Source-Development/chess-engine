@@ -48,6 +48,7 @@ public class Moves {
         }
 
         // Iterate through entire board and check for moves
+        // todo: change to iteration with trailing zeros
         for (int i = 0; i < 64; i++) {
             char newFile = (char)('a' + i % 8);
             int newRank = 8 - i/8;
@@ -135,6 +136,7 @@ public class Moves {
             return possibleMoves;
         }
         int index = trails;
+
         //System.out.println(String.format("%64s", Long.toBinaryString(WR)).replace(" ", "0"));
 
         while(trails != 64){
@@ -143,9 +145,9 @@ public class Moves {
             long rookPositionReversed = BitMasks.reverse64bits(rookPosition);
 
             // get rank and file of corresponding position bitboard
-            // todo: change to lookup values instead
             int rank = index / 8 + 1;
             int file = index % 8 + 1;
+            // todo: change to lookup values instead
             long rankMask = BitMasks.RANK_8 << ((rank - 1) * 8);
             long fileMask = BitMasks.FILE_A << (file - 1);
             // todo: change to lookup values instead
@@ -153,24 +155,26 @@ public class Moves {
             // search Horizontally / in the Rank
             long occupiedRank = ALL_PIECES & rankMask;
             long occupiedRankReversed = BitMasks.reverse64bits(occupiedRank);
-            long horizontalAttack = ((occupiedRank - (2 * rookPosition)) ^ BitMasks.reverse64bits(occupiedRankReversed - 2 * rookPositionReversed)) & rankMask ;
+            long horizontalMoves = ((occupiedRank - (2 * rookPosition)) ^ BitMasks.reverse64bits(occupiedRankReversed - 2 * rookPositionReversed)) & rankMask;
             // search Vertically / in the File
             long occupiedFile = ALL_PIECES & fileMask;
             long occupiedFileReversed = BitMasks.reverse64bits(occupiedFile);
-            long VerticalAttack = ((occupiedFile - (2 * rookPosition)) ^ BitMasks.reverse64bits(occupiedFileReversed - 2 * rookPositionReversed)) & fileMask ;
+            long VerticalMoves = ((occupiedFile - (2 * rookPosition)) ^ BitMasks.reverse64bits(occupiedFileReversed - 2 * rookPositionReversed)) & fileMask;
 
-            long attacks = horizontalAttack | VerticalAttack;
+            long moves = horizontalMoves | VerticalMoves;
+            moves = moves & ~WHITE_PIECES;
 
             //System.out.println("===");
             //BoardGeneration.drawBitboard(rookPosition);
             //System.out.println("===");
-            BoardGeneration.drawBitboard(attacks);
+            //BoardGeneration.drawBitboard(attacks);
 
+            // todo: change to iteration with trailing zeros
             for (int i = 0; i < 64; i++) {
                 char newFile = (char)('a' + i % 8);
                 int newRank = 8 - i/8;
 
-                if((attacks >> i & 1) == 1){
+                if((moves >> i & 1) == 1){
                     possibleMoves.add(
                             "" + (char)('a' + file - 1) + (9 - rank) + newFile + (newRank));
                 }

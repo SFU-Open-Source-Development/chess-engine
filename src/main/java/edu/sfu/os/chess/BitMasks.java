@@ -16,24 +16,9 @@ public class BitMasks {
     static final long CENTRE = 103481868288L;
     static final long EXTENDED_CENTRE = 66229406269440L;
 
-    static private long[] FILE_LOOKUP;
 
-    /**
-     * takes in a bitboard and find the first index that contains 1
-     * @param bitboard
-     * @return index of the first 1
-     */
     public static int getIndexFromBitboard(long bitboard){
-        // There might be a cheaper way:
-        // we could first initialize a lookup array / hash /? that maps bitboards onto indices
-        // todo: possible upgrade to Long numoftrailingzeros
-        int index = 0;
-
-        while(index < 64 && (1L << index != bitboard)){
-            index ++;
-        }
-
-        return index;
+        return Long.numberOfTrailingZeros(bitboard);
     }
 
     public static int getRankFromBitboard(long bitboard){

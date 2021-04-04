@@ -75,7 +75,20 @@ public class MovesTest {
     @Test
     public void testGenerateMovesRookWhite(){
 
+        String[][] chessBoard ={
+                {" ","n","b","q","k","b"," "," "},
+                {" ","P"," ","p","R"," ","P"," "},
+                {" "," "," "," "," ","b"," "," "},
+                {" ","p","b"," ","p","P"," "," "},
+                {" "," ","P","P"," "," "," "," "},
+                {" "," "," "," "," "," "," "," "},
+                {"P"," ","R"," "," "," ","P","P"},
+                {" ","N","B","Q"," ","B","N","K"}};
 
+        System.out.println(" a  b  c  d  e  f  g  h ");
+        Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
 
+        List<String> arr = Moves.generateMovesWR(currentPosition);
+        System.out.println(arr);
     }
 }
