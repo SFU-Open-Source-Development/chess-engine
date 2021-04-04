@@ -148,8 +148,10 @@ public class Moves {
             int rank = index / 8 + 1;
             int file = index % 8 + 1;
             // todo: change to lookup values instead
-            long rankMask = BitMasks.RANK_8 << ((rank - 1) * 8);
-            long fileMask = BitMasks.FILE_A << (file - 1);
+            //long rankMask = BitMasks.RANK_8 << ((rank - 1) * 8);
+            //long fileMask = BitMasks.FILE_A << (file - 1);
+            long rankMask = BitMasks.RANK[index];
+            long fileMask = BitMasks.FILE[index];
             // todo: change to lookup values instead
 
             // search Horizontally / in the Rank

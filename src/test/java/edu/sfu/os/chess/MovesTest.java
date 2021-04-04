@@ -75,6 +75,8 @@ public class MovesTest {
     @Test
     public void testGenerateMovesRookWhite(){
 
+        BitMasks.initBitMasks();
+
         String[][] chessBoard ={
                 {" ","n","b","q","k","b"," "," "},
                 {" ","P"," ","p","R"," ","P"," "},
@@ -90,5 +92,27 @@ public class MovesTest {
 
         List<String> arr = Moves.generateMovesWR(currentPosition);
         System.out.println(arr);
+    }
+
+    @Test
+    public void testBitMasks(){
+        BitMasks.initBitMasks();
+        final int n = 64;
+        for(int i = 0; i < n; i++){
+            System.out.printf("File Index %d\n", i);
+            BoardGeneration.drawBitboard(BitMasks.FILE[i]);
+        }
+        for(int i = 0; i < n; i++){
+            System.out.printf("Rank Index %d\n", i);
+            BoardGeneration.drawBitboard(BitMasks.RANK[i]);
+        }
+        for(int i = 0; i < n; i++){
+            System.out.printf("Diag Index %d\n", i);
+            BoardGeneration.drawBitboard(BitMasks.DIAG[i]);
+        }
+        for(int i = 0; i < n; i++){
+            System.out.printf("AntiDiag Index %d\n", i);
+            BoardGeneration.drawBitboard(BitMasks.ANTIDIAG[i]);
+        }
     }
 }

@@ -5,6 +5,7 @@ package edu.sfu.os.chess;
  * Bit masks used for move generation.
  * */
 public class BitMasks {
+
     static final long FILE_A = 72340172838076673L;
     static final long FILE_H = -9187201950435737472L;
     static final long FILE_AB = 217020518514230019L;
@@ -15,6 +16,10 @@ public class BitMasks {
     static final long RANK_8 = 255L;
     static final long CENTRE = 103481868288L;
     static final long EXTENDED_CENTRE = 66229406269440L;
+    static long[] FILE;
+    static long[] RANK;
+    static long[] DIAG;
+    static long[] ANTIDIAG;
 
 
     public static int getIndexFromBitboard(long bitboard){
@@ -70,6 +75,121 @@ public class BitMasks {
         bits = (bits & 0x5555555555555555L) << 1 | (bits & 0xAAAAAAAAAAAAAAAAL) >>> 1;
         //System.out.println(String.format("%64s", Long.toBinaryString(bits)).replace(" ", "0") + "(after)");
         return bits;
+    }
+
+    private static long convertMaskArray(boolean[] arr){
+        final int n = 64;
+        long res = 0L;
+        for(int i = n - 1; i >= 0; i--){
+            res = res << 1;
+            if(arr[i]){
+                res |= 1;
+            }
+        }
+        return res;
+    }
+
+    private static long[] getFileMasks(){
+        final int n = 64;
+        long[] res = new long[n];
+        boolean[] scratch;
+        int j;
+        for(int i = 0; i < n; i++){
+            scratch = new boolean[n];
+            // do up
+            j = i - 8;
+            while(j >= 0){
+                scratch[j] = true;
+                j -= 8;
+            }
+            // do down
+            j = i + 8;
+            while(j < n){
+                scratch[j] = true;
+                j += 8;
+            }
+            res[i] = convertMaskArray(scratch);
+        }
+        return res;
+    }
+
+    private static long[] getRankMasks(){
+        final int n = 64;
+        long[] res = new long[n];
+        boolean[] scratch;
+        int j;
+        for(int i = 0; i < n; i++){
+            scratch = new boolean[n];
+            // do left
+            j = i - 1;
+            while((j + 1) % 8 != 0){
+                scratch[j] = true;
+                j--;
+            }
+            // do right
+            j = i + 1;
+            while(j % 8 != 0){
+                scratch[j] = true;
+                j++;
+            }
+            res[i] = convertMaskArray(scratch);
+        }
+        return res;
+    }
+
+    private static long[] getDiagMasks(){
+        final int n = 64;
+        long[] res = new long[n];
+        boolean[] scratch;
+        int j;
+        for(int i = 0; i < n; i++){
+            scratch = new boolean[n];
+            // do right
+            j = i - 7;
+            while(j % 8 != 0 && j >= 0){
+                scratch[j] = true;
+                j -= 7;
+            }
+            // do left
+            j = i + 7;
+            while((j + 1) % 8 != 0 && j < n){
+                scratch[j] = true;
+                j += 7;
+            }
+            res[i] = convertMaskArray(scratch);
+        }
+        return res;
+    }
+
+    private static long[] getAntiDiagMasks(){
+        final int n = 64;
+        long[] res = new long[n];
+        boolean[] scratch;
+        int j;
+        for(int i = 0; i < n; i++){
+            scratch = new boolean[n];
+            // do right
+            j = i + 9;
+            while(j % 8 != 0 && j < n){
+                scratch[j] = true;
+                j += 9;
+            }
+            // do left
+            j = i - 9;
+            while((j + 1) % 8 != 0 && j >= 0){
+                scratch[j] = true;
+                j -= 9;
+            }
+            res[i] = convertMaskArray(scratch);
+        }
+        return res;
+    }
+
+    public static void initBitMasks(){
+        FILE = getFileMasks();
+        RANK = getRankMasks();
+        DIAG = getDiagMasks();
+        ANTIDIAG = getAntiDiagMasks();
     }
 
 }
