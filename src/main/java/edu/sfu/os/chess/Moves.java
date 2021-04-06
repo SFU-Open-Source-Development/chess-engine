@@ -23,7 +23,7 @@ public class Moves {
         long endRank = 8 - ind / 8;
 
         // handle promotions
-        if(endRank == 8){
+        if(endRank == 8 || endRank == 1){
             possibleMoves.add("" + startFile + startRank + endFile + endRank + "q");
             possibleMoves.add("" + startFile + startRank + endFile + endRank + "r");
             possibleMoves.add("" + startFile + startRank + endFile + endRank + "b");
