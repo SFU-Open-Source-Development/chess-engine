@@ -16,6 +16,7 @@ public class BitMasks {
     static final long RANK_8 = 255L;
     static final long CENTRE = 103481868288L;
     static final long EXTENDED_CENTRE = 66229406269440L;
+    // BitMasks of the attack, array of size 64
     static long[] FILE;
     static long[] RANK;
     static long[] DIAG;
@@ -78,6 +79,7 @@ public class BitMasks {
     }
 
     private static long convertMaskArray(boolean[] arr){
+        // Converts a boolean array of bitmasks to a long
         final int n = 64;
         long res = 0L;
         for(int i = n - 1; i >= 0; i--){
@@ -90,6 +92,7 @@ public class BitMasks {
     }
 
     private static long[] getFileMasks(){
+        // Generates the file bitmasks
         final int n = 64;
         long[] res = new long[n];
         boolean[] scratch;
@@ -114,6 +117,7 @@ public class BitMasks {
     }
 
     private static long[] getRankMasks(){
+        // Generates the rank bitmasks
         final int n = 64;
         long[] res = new long[n];
         boolean[] scratch;
@@ -138,30 +142,7 @@ public class BitMasks {
     }
 
     private static long[] getDiagMasks(){
-        final int n = 64;
-        long[] res = new long[n];
-        boolean[] scratch;
-        int j;
-        for(int i = 0; i < n; i++){
-            scratch = new boolean[n];
-            // do right
-            j = i - 7;
-            while(j % 8 != 0 && j >= 0){
-                scratch[j] = true;
-                j -= 7;
-            }
-            // do left
-            j = i + 7;
-            while((j + 1) % 8 != 0 && j < n){
-                scratch[j] = true;
-                j += 7;
-            }
-            res[i] = convertMaskArray(scratch);
-        }
-        return res;
-    }
-
-    private static long[] getAntiDiagMasks(){
+        // Generates the diag bitmasks
         final int n = 64;
         long[] res = new long[n];
         boolean[] scratch;
@@ -179,6 +160,31 @@ public class BitMasks {
             while((j + 1) % 8 != 0 && j >= 0){
                 scratch[j] = true;
                 j -= 9;
+            }
+            res[i] = convertMaskArray(scratch);
+        }
+        return res;
+    }
+
+    private static long[] getAntiDiagMasks(){
+        // Generates the anti-diag bitmasks
+        final int n = 64;
+        long[] res = new long[n];
+        boolean[] scratch;
+        int j;
+        for(int i = 0; i < n; i++){
+            scratch = new boolean[n];
+            // do right
+            j = i - 7;
+            while(j % 8 != 0 && j >= 0){
+                scratch[j] = true;
+                j -= 7;
+            }
+            // do left
+            j = i + 7;
+            while((j + 1) % 8 != 0 && j < n){
+                scratch[j] = true;
+                j += 7;
             }
             res[i] = convertMaskArray(scratch);
         }

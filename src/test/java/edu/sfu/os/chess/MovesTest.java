@@ -27,7 +27,7 @@ public class MovesTest {
 
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
-        List<String> arr = generateMovesPW(BitMasks.RANK_1 >>> 48,currentPosition);
+        List<String> arr = generateMovesWP(BitMasks.RANK_1 >>> 48,currentPosition);
         System.out.println(String.join(", ", arr));
 
     }
@@ -40,14 +40,14 @@ public class MovesTest {
                 {" ","P"," ","p"," "," ","P"," "},
                 {" "," "," "," "," "," "," "," "},
                 {" ","p"," "," ","p","P"," "," "},
-                {" "," ","P","P","N"," "," "," "},
-                {" "," "," "," "," "," "," "," "},
+                {" "," ","P","P"," "," "," "," "},
+                {"N"," "," "," "," "," "," ","N"},
                 {"P"," "," "," "," "," ","P","P"},
-                {"R"," ","B","Q","K","B"," ","R"}};
+                {"R"," ","B","Q","K","B"," "," "}};
 
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
-        List<String> arr = generateMovesNW(BitMasks.RANK_1 >>> 48,currentPosition);
+        List<String> arr = generateMovesWN(BitMasks.RANK_1 >>> 48,currentPosition);
         System.out.println(String.join(", ", arr));
 
     }
@@ -67,7 +67,7 @@ public class MovesTest {
 
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
-        List<String> arr = generateMovesKW(BitMasks.RANK_1 >>> 48,currentPosition);
+        List<String> arr = generateMovesWK(BitMasks.RANK_1 >>> 48,currentPosition);
         System.out.println(String.join(", ", arr));
 
     }
@@ -85,12 +85,34 @@ public class MovesTest {
                 {" "," ","P","P"," "," "," "," "},
                 {" "," "," "," "," "," "," "," "},
                 {"P"," ","R"," "," "," ","P","P"},
-                {" ","N","B","Q"," ","B","N","K"}};
+                {" ","N","B","Q"," ","B","R"," "}};
 
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
 
         List<String> arr = Moves.generateMovesWR(currentPosition);
+        System.out.println(arr);
+    }
+
+    @Test
+    public void testGenerateMovesBishopWhite(){
+
+        BitMasks.initBitMasks();
+
+        String[][] chessBoard ={
+                {" ","n","b","q","k","b"," "," "},
+                {" ","P"," ","p","R"," ","P"," "},
+                {" "," "," "," "," ","b"," "," "},
+                {" ","p","b","B","p","P"," "," "},
+                {" "," ","p","P"," "," "," "," "},
+                {" "," "," "," "," "," "," "," "},
+                {"P"," ","R"," "," "," ","p","P"},
+                {" ","N","B","Q"," ","B","R","B"}};
+
+        System.out.println(" a  b  c  d  e  f  g  h ");
+        Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
+
+        List<String> arr = Moves.generateMovesWB(currentPosition);
         System.out.println(arr);
     }
 

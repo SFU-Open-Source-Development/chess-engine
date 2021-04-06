@@ -6,7 +6,89 @@ import java.util.List;
 
 public class Moves {
 
-    public static List<String> generateMovesPW(long lastBP,Board currentPosition) {
+    private static String indexToNotation(long ind){
+        // Given an index number, returns the coordinate of the index number
+        char file = (char)('a' + ind % 8);
+        long rank = 8 - ind/8;
+        return ("" + file + rank);
+    }
+
+    private static List<String> indexToNotationOffset(long ind, int offset){
+        // Used by the pawn
+        // Given an index number, returns the notation. Offset denotes the starting position of the piece.
+        List<String> possibleMoves = new ArrayList<>();
+        char startFile = (char)('a' + (ind + offset) % 8);
+        long startRank = 8 - (ind + offset) / 8;
+        char endFile = (char)('a' + ind % 8);
+        long endRank = 8 - ind / 8;
+
+        // handle promotions
+        if(endRank == 8){
+            possibleMoves.add("" + startFile + startRank + endFile + endRank + "q");
+            possibleMoves.add("" + startFile + startRank + endFile + endRank + "r");
+            possibleMoves.add("" + startFile + startRank + endFile + endRank + "b");
+            possibleMoves.add("" + startFile + startRank + endFile + endRank + "n");
+        }
+        else{
+            possibleMoves.add("" + startFile + startRank + endFile + endRank);
+        }
+
+        return possibleMoves;
+    }
+
+    private static List<String> bitboardToNotation(long bb){
+        // Given a bit board, returns a list of all coordinates marked
+        List<String> coordinates = new ArrayList<>();
+        if(bb == 0){
+            // Empty board
+            return coordinates;
+        }
+        // Copy of the board to shift
+        long trails = bb;
+        // Keep track of the index value
+        int index = 0;
+        while(trails != 0){
+            // Get next shift amount
+            int shift = Long.numberOfTrailingZeros(trails);
+            // Get index of next marked coordinate
+            index += shift;
+            coordinates.add(indexToNotation(index));
+            // Split the shift up, to avoid shifting by 64 bits
+            trails = trails >>> shift;
+            trails = trails >>> 1;
+            index++;
+        }
+        return coordinates;
+    }
+
+    private static List<String> bitboardToNotationOffset(long bb, int offset){
+        // Used by the pawn
+        // Given a bit board, returns a list of all coordinates marked.
+        // Offset denotes the starting position of the piece.
+        List<String> possibleMoves = new ArrayList<>();
+        if(bb == 0){
+            // Empty board
+            return possibleMoves;
+        }
+        // Copy of the board to shift
+        long trails = bb;
+        // Keep track of the index value
+        int index = 0;
+        while(trails != 0){
+            // Get next shift amount
+            int shift = Long.numberOfTrailingZeros(trails);
+            // Get index of next marked coordinate
+            index += shift;
+            possibleMoves.addAll(indexToNotationOffset(index, offset));
+            // Split the shift up, to avoid shifting by 64 bits
+            trails = trails >>> shift;
+            trails = trails >>> 1;
+            index++;
+        }
+        return possibleMoves;
+    }
+
+    public static List<String> generateMovesWP(long lastBP,Board currentPosition) {
 
         // Retrieve bitmap from Board;
         long BP = currentPosition.BP;
@@ -36,63 +118,126 @@ public class Moves {
         // En passant
         long enPassant = BP & (lastBP & BP_INITIAL) << 16;
         // Attacks
-        long captureTopLeft = WP >> 9 & (BLACK_PIECES | enPassant >> 8) & ~(BitMasks.FILE_H);
-        long captureTopRight = WP >> 7 & (BLACK_PIECES | enPassant >> 8) & ~(BitMasks.FILE_A);
+        long captureLeft = WP >> 9 & (BLACK_PIECES | enPassant >> 8) & ~(BitMasks.FILE_H);
+        long captureRight = WP >> 7 & (BLACK_PIECES | enPassant >> 8) & ~(BitMasks.FILE_A);
 
-        // Iterate through rank 5 to check for pawn moving up by 2
-        for(int i = 32; i < 40; i++) {
-            if((moveUpTwo >> i & 1) == 1){
-                possibleMoves.add( //"up2:" +
-                        "" +  (char)('a' + i % 8) +"2" + (char)('a' + i % 8) + "4");
-            }
-        }
-
-        // Iterate through entire board and check for moves
-        // todo: change to iteration with trailing zeros
-        for (int i = 0; i < 64; i++) {
-            char newFile = (char)('a' + i % 8);
-            int newRank = 8 - i/8;
-
-            // Check for promotion eligibility
-            char promotion = i <= 8? 'q':'\0';
-
-            if((moveUpOne >> i & 1) == 1){
-                possibleMoves.add( //"up1:" +
-                        "" + newFile + (newRank - 1) + newFile + (newRank) + promotion);
-            }
-            if((captureTopLeft >> i & 1) == 1){
-                possibleMoves.add( //"capLeft:" +
-                        "" +  (char)(newFile + 1) + (newRank - 1) + newFile + (newRank) + promotion);
-            }
-            if((captureTopRight >> i & 1) == 1){
-                possibleMoves.add( //"capRight:" +
-                        "" + (char)(newFile - 1) + (newRank - 1) + newFile + (newRank) + promotion);
-            }
-
-        }
-
-        // Debug
-        /*
-        System.out.println("\nmoveUpOne destination");
-        System.out.println(" a  b  c  d  e  f  g  h ");
-        BoardGeneration.drawBitboard(moveUpOne);
-
-        System.out.println("\nmoveUpTwo destination");
-        System.out.println(" a  b  c  d  e  f  g  h ");
-        BoardGeneration.drawBitboard(moveUpTwo);
-
-        System.out.println("\ncaptureTopLeft destination");
-        System.out.println(" a  b  c  d  e  f  g  h ");
-        BoardGeneration.drawBitboard(captureTopLeft);
-
-        System.out.println("\ncaptureTopRight destination");
-        System.out.println(" a  b  c  d  e  f  g  h ");
-        BoardGeneration.drawBitboard(captureTopRight);
-
-        System.out.println(captureTopLeft);
-        */
+        possibleMoves.addAll(bitboardToNotationOffset(moveUpOne, 8));
+        possibleMoves.addAll(bitboardToNotationOffset(moveUpTwo, 16));
+        possibleMoves.addAll(bitboardToNotationOffset(captureLeft, 9));
+        possibleMoves.addAll(bitboardToNotationOffset(captureRight, 7));
 
         Collections.sort(possibleMoves);
+        return possibleMoves;
+    }
+
+    public static List<String> generateMovesWN(long lastBP,Board currentPosition) {
+        // Retrieve bitmap from Board;
+        long WP = currentPosition.WP;
+        long WN = currentPosition.WN;
+        long WB = currentPosition.WB;
+        long WR = currentPosition.WR;
+        long WQ = currentPosition.WQ;
+        long WK = currentPosition.WK;
+
+        final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
+
+        List<String> possibleMoves = new ArrayList<>();
+
+        if(WN == 0){
+            // No knight exists
+            return possibleMoves;
+        }
+        long trails = WN;
+        int index = 0;
+        while(trails != 0){
+            // Get next shift amount
+            int shift = Long.numberOfTrailingZeros(trails);
+            // Get next index of piece
+            index += shift;
+            // Recreate the piece location
+            long knightPosition = 1L << index;
+            long moves = 0L;
+
+            /*  Ordering of the knight moves
+             *  * 8 * 0 *
+             *  7 * * * 1
+             *  * * N * *
+             *  6 * * * 2
+             *  * 5 * 4 *
+             */
+
+            moves |= (knightPosition >>> 15 & ~(WHITE_PIECES | BitMasks.FILE_A));
+            moves |= (knightPosition >>> 6 & ~(WHITE_PIECES | BitMasks.FILE_AB));
+            moves |= (knightPosition << 10 & ~(WHITE_PIECES | BitMasks.FILE_AB));
+            moves |= (knightPosition << 17 & ~(WHITE_PIECES | BitMasks.FILE_A));
+            moves |= (knightPosition << 15 & ~(WHITE_PIECES | BitMasks.FILE_H));
+            moves |= (knightPosition << 6 & ~(WHITE_PIECES | BitMasks.FILE_GH));
+            moves |= (knightPosition >>> 10 & ~(WHITE_PIECES | BitMasks.FILE_GH));
+            moves |= (knightPosition >>> 17 & ~(WHITE_PIECES | BitMasks.FILE_H));
+
+            List<String> end = bitboardToNotation(moves);
+            String start = indexToNotation(index);
+            for(var s : end){
+                possibleMoves.add(start + s);
+            }
+            trails = trails >>> shift;
+            trails = trails >>> 1;
+            index++;
+        }
+        Collections.sort(possibleMoves);
+        return possibleMoves;
+    }
+
+    public static List<String> generateMovesWK(long lastBP,Board currentPosition) {
+        // Retrieve bitmap from Board;
+        long WP = currentPosition.WP;
+        long WN = currentPosition.WN;
+        long WB = currentPosition.WB;
+        long WR = currentPosition.WR;
+        long WQ = currentPosition.WQ;
+        long WK = currentPosition.WK;
+
+        final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
+
+        List<String> possibleMoves = new ArrayList<>();
+
+        if (WK == 0) {
+            // No king exists
+            return possibleMoves;
+        }
+
+        long trails = WK;
+        int index = 0;
+        while (trails != 0) {
+            // Get next index of piece
+            index += Long.numberOfTrailingZeros(trails);
+            // Recreate the piece location
+            long kingPosition = 1L << index;
+            long moves = 0L;
+            /* Order of the king moves
+             *  0 1 2
+             *  3 K 4
+             *  5 6 7
+             */
+
+            moves |= (kingPosition >>> 9 & ~(WHITE_PIECES | BitMasks.FILE_H));
+            moves |= (kingPosition >>> 8 & ~(WHITE_PIECES));
+            moves |= (kingPosition >>> 7 & ~(WHITE_PIECES | BitMasks.FILE_A));
+            moves |= (kingPosition >>> 1 & ~(WHITE_PIECES | BitMasks.FILE_H));
+            moves |= (kingPosition << 1 & ~(WHITE_PIECES | BitMasks.FILE_A));
+            moves |= (kingPosition << 7 & ~(WHITE_PIECES | BitMasks.FILE_H));
+            moves |= (kingPosition << 8 & ~(WHITE_PIECES));
+            moves |= (kingPosition << 9 & ~(WHITE_PIECES | BitMasks.FILE_A));
+
+            List<String> end = bitboardToNotation(moves);
+            String start = indexToNotation(index);
+            for (var s : end) {
+                possibleMoves.add(start + s);
+            }
+            trails = trails >>> Long.numberOfTrailingZeros(trails);
+            trails = trails >>> 1;
+            index++;
+        }
         return possibleMoves;
     }
 
@@ -112,7 +257,6 @@ public class Moves {
         long WK = currentPosition.WK;
 
         final long ALL_PIECES = BP | BN | BB | BR | BQ | BK | WP | WN | WB | WR | WQ | WK;
-        final long BLACK_PIECES = BP | BN | BB | BR | BQ | BK; // Black's current pieces position
         final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
 
         List<String> possibleMoves = new ArrayList<>();
@@ -130,29 +274,25 @@ public class Moves {
             Combining left and right
             lineAttacks=(((o&m)-2s) ^ ((o&m)'-2s')')&m
         */
-
-        int trails = Long.numberOfTrailingZeros(WR);
-        if(trails == 64){
+        if(WR == 0){
+            // No rook exists
             return possibleMoves;
         }
-        int index = trails;
 
-        //System.out.println(String.format("%64s", Long.toBinaryString(WR)).replace(" ", "0"));
-
-        while(trails != 64){
-
+        long trails = WR;
+        int index = 0;
+        while(trails != 0){
+            // Get next index of piece
+            int shift = Long.numberOfTrailingZeros(trails);
+            // Get next index of piece
+            index += shift;
+            // Recreate the piece location
             long rookPosition = 1L << index;
             long rookPositionReversed = BitMasks.reverse64bits(rookPosition);
 
-            // get rank and file of corresponding position bitboard
-            int rank = index / 8 + 1;
-            int file = index % 8 + 1;
-            // todo: change to lookup values instead
-            //long rankMask = BitMasks.RANK_8 << ((rank - 1) * 8);
-            //long fileMask = BitMasks.FILE_A << (file - 1);
+            // Get the masks
             long rankMask = BitMasks.RANK[index];
             long fileMask = BitMasks.FILE[index];
-            // todo: change to lookup values instead
 
             // search Horizontally / in the Rank
             long occupiedRank = ALL_PIECES & rankMask;
@@ -161,128 +301,25 @@ public class Moves {
             // search Vertically / in the File
             long occupiedFile = ALL_PIECES & fileMask;
             long occupiedFileReversed = BitMasks.reverse64bits(occupiedFile);
-            long VerticalMoves = ((occupiedFile - (2 * rookPosition)) ^ BitMasks.reverse64bits(occupiedFileReversed - 2 * rookPositionReversed)) & fileMask;
+            long verticalMoves = ((occupiedFile - (2 * rookPosition)) ^ BitMasks.reverse64bits(occupiedFileReversed - 2 * rookPositionReversed)) & fileMask;
 
-            long moves = horizontalMoves | VerticalMoves;
+            long moves = horizontalMoves | verticalMoves;
             moves = moves & ~WHITE_PIECES;
 
-            //System.out.println("===");
-            //BoardGeneration.drawBitboard(rookPosition);
-            //System.out.println("===");
-            //BoardGeneration.drawBitboard(attacks);
-
-            // todo: change to iteration with trailing zeros
-            for (int i = 0; i < 64; i++) {
-                char newFile = (char)('a' + i % 8);
-                int newRank = 8 - i/8;
-
-                if((moves >> i & 1) == 1){
-                    possibleMoves.add(
-                            "" + (char)('a' + file - 1) + (9 - rank) + newFile + (newRank));
-                }
+            List<String> end = bitboardToNotation(moves);
+            String start = indexToNotation(index);
+            for(var s : end){
+                possibleMoves.add(start + s);
             }
-
-            trails = Long.numberOfTrailingZeros(WR >>> index + 1);
-            // trails is storing the number of 0's at the end (which doesn't include the next 1)
-            index += trails + 1; // so in order to retrieve next 1, we need this (+1)
+            trails = trails >>> shift;
+            trails = trails >>> 1;
+            index++;
         }
-
+        Collections.sort(possibleMoves);
         return possibleMoves;
     }
 
-    public static List<String> generateMovesNW(long lastBP,Board currentPosition) {
-        // Retrieve bitmap from Board;
-        long WP = currentPosition.WP;
-        long WN = currentPosition.WN;
-        long WB = currentPosition.WB;
-        long WR = currentPosition.WR;
-        long WQ = currentPosition.WQ;
-        long WK = currentPosition.WK;
-
-        final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
-
-        List<String> possibleMoves = new ArrayList<>();
-
-        long[] knightMoves = new long[8];
-
-        /*  * 8 * 0 *
-            7 * * * 1
-            * * N * *
-            6 * * * 2
-            * 5 * 4 *
-         */
-
-        knightMoves[0] = WN >> 15 & ~(WHITE_PIECES | BitMasks.FILE_A);
-        knightMoves[1] = WN >> 6 & ~(WHITE_PIECES | BitMasks.FILE_AB);
-        knightMoves[2] = WN << 10 & ~(WHITE_PIECES | BitMasks.FILE_AB);
-        knightMoves[3] = WN << 17 & ~(WHITE_PIECES | BitMasks.FILE_A);
-        knightMoves[4] = WN << 15 & ~(WHITE_PIECES | BitMasks.FILE_H);
-        knightMoves[5] = WN << 6 & ~(WHITE_PIECES | BitMasks.FILE_GH);
-        knightMoves[6] = WN >> 10 & ~(WHITE_PIECES | BitMasks.FILE_H);
-        knightMoves[7] = WN >> 17 & ~(WHITE_PIECES | BitMasks.FILE_GH);
-
-        for (int i = 0; i < 64; i++) {
-            char newFile = (char)('a' + i % 8);
-            int newRank = 8 - i/8;
-
-            for(int j = 0; j < 8; j++) {
-                switch (j) {
-                    case 0:
-                        if ((knightMoves[j] >> i & 1) == 1) {
-                            possibleMoves.add(
-                                    "" + (char)(newFile - 1) + (newRank - 2) + newFile + newRank);
-                        }
-                        break;
-                    case 1:
-                        if ((knightMoves[j] >> i & 1) == 1) {
-                            possibleMoves.add(
-                                    "" + (char)(newFile - 2) + (newRank - 1) + newFile + newRank);
-                        }
-                        break;
-                    case 2:
-                        if ((knightMoves[j] >> i & 1) == 1) {
-                            possibleMoves.add(
-                                    "" + (char)(newFile - 2) + (newRank + 1) + newFile + newRank);
-                        }
-                        break;
-                    case 3:
-                        if ((knightMoves[j] >> i & 1) == 1) {
-                            possibleMoves.add(
-                                    "" + (char)(newFile - 1) + (newRank + 2) + newFile + newRank);
-                        }
-                        break;
-                    case 4:
-                        if ((knightMoves[j] >> i & 1) == 1) {
-                            possibleMoves.add(
-                                    "" + (char)(newFile + 1) + (newRank + 2) + newFile + newRank);
-                        }
-                        break;
-                    case 5:
-                        if ((knightMoves[j] >> i & 1) == 1) {
-                            possibleMoves.add(
-                                    "" + (char)(newFile + 2) + (newRank + 1) + newFile + newRank);
-                        }
-                        break;
-                    case 6:
-                        if ((knightMoves[j] >> i & 1) == 1) {
-                            possibleMoves.add(
-                                    "" + (char)(newFile + 2) + (newRank - 1) + newFile + newRank);
-                        }
-                        break;
-                    case 7:
-                        if ((knightMoves[j] >> i & 1) == 1) {
-                            possibleMoves.add(
-                                    "" + (char)(newFile + 1) + (newRank - 2) + newFile + newRank);
-                        }
-                        break;
-                }
-            }
-        }
-
-        return possibleMoves;
-    }
-
-    public static List<String> generateMovesKW(long lastBP,Board currentPosition) {
+    public static List<String> generateMovesWB(Board currentPosition){
         // Retrieve bitmap from Board;
         long BP = currentPosition.BP;
         long BN = currentPosition.BN;
@@ -297,86 +334,66 @@ public class Moves {
         long WQ = currentPosition.WQ;
         long WK = currentPosition.WK;
 
-        // KING NOT INCLUDED
-        final long WHITE_PIECES = WP | WN | WB | WR | WQ; // White's current pieces position
+        final long ALL_PIECES = BP | BN | BB | BR | BQ | BK | WP | WN | WB | WR | WQ | WK;
+        final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
 
         List<String> possibleMoves = new ArrayList<>();
-
-        long[] kingMoves = new long[8];
-
         /*
-            0 1 2
-            3 K 4
-            5 6 7
-         */
+            reference: https://www.youtube.com/watch?v=bCH4YK6oq8M&ab_channel=LogicCrazyChess
 
-        kingMoves[0] = WK >> 9 & ~(WHITE_PIECES | BitMasks.FILE_H);
-        kingMoves[1] = WK >> 8 & ~(WHITE_PIECES);
-        kingMoves[2] = WK >> 7 & ~(WHITE_PIECES | BitMasks.FILE_A);
-        kingMoves[3] = WK >> 1 & ~(WHITE_PIECES | BitMasks.FILE_H);
-        kingMoves[4] = WK << 1 & ~(WHITE_PIECES | BitMasks.FILE_A);
-        kingMoves[5] = WK << 7 & ~(WHITE_PIECES | BitMasks.FILE_H);
-        kingMoves[6] = WK << 8 & ~(WHITE_PIECES);
-        kingMoves[7] = WK << 9 & ~(WHITE_PIECES | BitMasks.FILE_A);
+            ========= The Trick ===========
+            occupied=11000101 as (o)
+            slider=00000100   as (s)
+            o-s=11000001
+            o-2s=10111101     // equals to shifting to left by 1
+            left=o^(o-2s)=01111000
+            ===============================
 
-        for (int i = 0; i < 64; i++) {
-            char newFile = (char)('a' + i % 8);
-            int newRank = 8 - i/8;
-
-            for(int j = 0; j < 8; j++) {
-                switch (j) {
-                    case 0:
-                        if ((kingMoves[j] >> i & 1) == 1) {
-                            possibleMoves.add(
-                                    "" + (char)(newFile + 1) + (newRank - 1) + newFile + newRank);
-                        }
-                        break;
-                    case 1:
-                        if ((kingMoves[j] >> i & 1) == 1) {
-                            possibleMoves.add(
-                                    "" + newFile + (newRank - 1) + newFile + newRank);
-                        }
-                        break;
-                    case 2:
-                        if ((kingMoves[j] >> i & 1) == 1) {
-                            possibleMoves.add(
-                                    "" + (char)(newFile - 1) + (newRank - 1) + newFile + newRank);
-                        }
-                        break;
-                    case 3:
-                        if ((kingMoves[j] >> i & 1) == 1) {
-                            possibleMoves.add(
-                                    "" + (char)(newFile + 1) + newRank + newFile + newRank);
-                        }
-                        break;
-                    case 4:
-                        if ((kingMoves[j] >> i & 1) == 1) {
-                            possibleMoves.add(
-                                    "" + (char)(newFile - 1) + newRank + newFile + newRank);
-                        }
-                        break;
-                    case 5:
-                        if ((kingMoves[j] >> i & 1) == 1) {
-                            possibleMoves.add(
-                                    "" + (char)(newFile + 1) + (newRank + 1) + newFile + newRank);
-                        }
-                        break;
-                    case 6:
-                        if ((kingMoves[j] >> i & 1) == 1) {
-                            possibleMoves.add(
-                                    "" + newFile + (newRank + 1) + newFile + newRank);
-                        }
-                        break;
-                    case 7:
-                        if ((kingMoves[j] >> i & 1) == 1) {
-                            possibleMoves.add(
-                                    "" + (char)(newFile - 1) + (newRank + 1) + newFile + newRank);
-                        }
-                        break;
-                }
-            }
+            Combining left and right
+            lineAttacks=(((o&m)-2s) ^ ((o&m)'-2s')')&m
+        */
+        if(WB == 0){
+            // No bishop exists
+            return possibleMoves;
         }
 
+        long trails = WB;
+        int index = 0;
+        while(trails != 0){
+            // Get next index of piece
+            int shift = Long.numberOfTrailingZeros(trails);
+            // Get next index of piece
+            index += shift;
+            // Recreate the piece location
+            long bishopPosition = 1L << index;
+            long bishopPositionReversed = BitMasks.reverse64bits(bishopPosition);
+
+            // Get the masks
+            long diagMask = BitMasks.DIAG[index];
+            long antiDiagMask = BitMasks.ANTIDIAG[index];
+
+            // search Diagonal,
+            long occupiedDiag = ALL_PIECES & diagMask;
+            long occupiedDiagReversed = BitMasks.reverse64bits(occupiedDiag);
+            long diagMoves = ((occupiedDiag - (2 * bishopPosition)) ^ BitMasks.reverse64bits(occupiedDiagReversed - 2 * bishopPositionReversed)) & diagMask;
+            // search Vertically / in the File
+            long occupiedAntiDiag = ALL_PIECES & antiDiagMask;
+            long occupiedAntiDiagReversed = BitMasks.reverse64bits(occupiedAntiDiag);
+            long antiDiagMoves = ((occupiedAntiDiag - (2 * bishopPosition)) ^ BitMasks.reverse64bits(occupiedAntiDiagReversed - 2 * bishopPositionReversed)) & antiDiagMask;
+
+            long moves = diagMoves | antiDiagMoves;
+            moves = moves & ~WHITE_PIECES;
+
+            List<String> end = bitboardToNotation(moves);
+            String start = indexToNotation(index);
+            for(var s : end){
+                possibleMoves.add(start + s);
+            }
+            trails = trails >>> shift;
+            trails = trails >>> 1;
+            index++;
+        }
+        Collections.sort(possibleMoves);
         return possibleMoves;
     }
 }
