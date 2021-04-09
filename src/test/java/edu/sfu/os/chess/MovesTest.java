@@ -1,6 +1,7 @@
 package edu.sfu.os.chess;
 
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
@@ -11,6 +12,14 @@ import static edu.sfu.os.chess.Moves.*;
  * Unit test for Moves
  */
 public class MovesTest {
+
+    /**
+     * This is run before running other tests
+     */
+    @Before
+    public void setUpBeforeTest(){
+        BitMasks.initBitMasks();
+    }
 
     @Test
     public void testGenerateMovesPawnWhite(){
@@ -47,7 +56,7 @@ public class MovesTest {
 
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
-        List<String> arr = generateMovesWN(BitMasks.RANK_1 >>> 48,currentPosition);
+        List<String> arr = generateMovesWN(currentPosition);
         System.out.println(String.join(", ", arr));
 
     }
@@ -67,15 +76,13 @@ public class MovesTest {
 
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
-        List<String> arr = generateMovesWK(BitMasks.RANK_1 >>> 48,currentPosition);
+        List<String> arr = generateMovesWK(currentPosition);
         System.out.println(String.join(", ", arr));
 
     }
 
     @Test
     public void testGenerateMovesRookWhite(){
-
-        BitMasks.initBitMasks();
 
         String[][] chessBoard ={
                 {" ","n","b","q","k","b"," "," "},
@@ -97,8 +104,6 @@ public class MovesTest {
     @Test
     public void testGenerateMovesBishopWhite(){
 
-        BitMasks.initBitMasks();
-
         String[][] chessBoard ={
                 {" ","n","b","q","k","b"," "," "},
                 {" ","P"," ","p","R"," ","P"," "},
@@ -118,7 +123,9 @@ public class MovesTest {
 
     @Test
     public void testBitMasks(){
+
         BitMasks.initBitMasks();
+
         final int n = 64;
         for(int i = 0; i < n; i++){
             System.out.printf("File Index %d\n", i);
@@ -136,5 +143,25 @@ public class MovesTest {
             System.out.printf("AntiDiag Index %d\n", i);
             BoardGeneration.drawBitboard(BitMasks.ANTIDIAG[i]);
         }
+    }
+
+    @Test
+    public void testGenerateMovesWhiteQueens(){
+
+        String[][] chessBoard ={
+                {" ","n","b","q","k","b"," "," "},
+                {" ","P"," ","p","R"," ","P"," "},
+                {" "," "," "," "," ","b"," "," "},
+                {" ","p","b","Q","p","P"," "," "},
+                {" "," ","p","P"," "," "," "," "},
+                {" "," "," "," "," "," "," "," "},
+                {"P"," ","R"," "," "," ","p","P"},
+                {" ","N","B","Q"," ","B","R","B"}};
+
+        System.out.println(" a  b  c  d  e  f  g  h ");
+        Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
+
+        List<String> arr = Moves.generateMovesWQ(currentPosition);
+        System.out.println(arr);
     }
 }

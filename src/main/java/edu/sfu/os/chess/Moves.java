@@ -6,6 +6,22 @@ import java.util.List;
 
 public class Moves {
 
+
+    public static List<String> generateAllWhiteMoves(Board currentPosition, long lastBP){
+
+        List<String> whiteMoves = new ArrayList<>();
+
+        whiteMoves.addAll(generateMovesWP(lastBP, currentPosition));
+        whiteMoves.addAll(generateMovesWN(currentPosition));
+        whiteMoves.addAll(generateMovesWK(currentPosition));
+        whiteMoves.addAll(generateMovesWR(currentPosition));
+        whiteMoves.addAll(generateMovesWB(currentPosition));
+        whiteMoves.addAll(generateMovesWQ(currentPosition));
+
+        return whiteMoves;
+    }
+
+    // Helper functions for generating result Strings from derived Bitboards
     private static String indexToNotation(long ind){
         // Given an index number, returns the coordinate of the index number
         char file = (char)('a' + ind % 8);
@@ -88,6 +104,7 @@ public class Moves {
         return possibleMoves;
     }
 
+    // Moves Generation
     public static List<String> generateMovesWP(long lastBP,Board currentPosition) {
 
         // Retrieve bitmap from Board;
@@ -130,7 +147,7 @@ public class Moves {
         return possibleMoves;
     }
 
-    public static List<String> generateMovesWN(long lastBP,Board currentPosition) {
+    public static List<String> generateMovesWN(Board currentPosition) {
         // Retrieve bitmap from Board;
         long WP = currentPosition.WP;
         long WN = currentPosition.WN;
@@ -188,7 +205,7 @@ public class Moves {
         return possibleMoves;
     }
 
-    public static List<String> generateMovesWK(long lastBP,Board currentPosition) {
+    public static List<String> generateMovesWK(Board currentPosition) {
         // Retrieve bitmap from Board;
         long WP = currentPosition.WP;
         long WN = currentPosition.WN;
@@ -238,6 +255,7 @@ public class Moves {
             trails = trails >>> 1;
             index++;
         }
+
         return possibleMoves;
     }
 
@@ -372,11 +390,11 @@ public class Moves {
             long diagMask = BitMasks.DIAG[index];
             long antiDiagMask = BitMasks.ANTIDIAG[index];
 
-            // search Diagonal,
+            // search Diagonally
             long occupiedDiag = ALL_PIECES & diagMask;
             long occupiedDiagReversed = BitMasks.reverse64bits(occupiedDiag);
             long diagMoves = ((occupiedDiag - (2 * bishopPosition)) ^ BitMasks.reverse64bits(occupiedDiagReversed - 2 * bishopPositionReversed)) & diagMask;
-            // search Vertically / in the File
+            // search AntiDiagonally
             long occupiedAntiDiag = ALL_PIECES & antiDiagMask;
             long occupiedAntiDiagReversed = BitMasks.reverse64bits(occupiedAntiDiag);
             long antiDiagMoves = ((occupiedAntiDiag - (2 * bishopPosition)) ^ BitMasks.reverse64bits(occupiedAntiDiagReversed - 2 * bishopPositionReversed)) & antiDiagMask;
@@ -393,6 +411,86 @@ public class Moves {
             trails = trails >>> 1;
             index++;
         }
+        Collections.sort(possibleMoves);
+        return possibleMoves;
+    }
+
+    public static List<String> generateMovesWQ(Board currentPosition){
+        // Retrieve bitmap from Board;
+        long BP = currentPosition.BP;
+        long BN = currentPosition.BN;
+        long BB = currentPosition.BB;
+        long BR = currentPosition.BR;
+        long BQ = currentPosition.BQ;
+        long BK = currentPosition.BK;
+        long WP = currentPosition.WP;
+        long WN = currentPosition.WN;
+        long WB = currentPosition.WB;
+        long WR = currentPosition.WR;
+        long WQ = currentPosition.WQ;
+        long WK = currentPosition.WK;
+
+        final long ALL_PIECES = BP | BN | BB | BR | BQ | BK | WP | WN | WB | WR | WQ | WK;
+        final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
+
+        List<String> possibleMoves = new ArrayList<>();
+
+        if(WQ == 0){
+            // No Queen exist exists
+            return possibleMoves;
+        }
+
+        long trails = WQ;
+        int index = 0;
+        while(trails != 0){
+            // Get next index of piece
+            int shift = Long.numberOfTrailingZeros(trails);
+            // Get next index of piece
+            index += shift;
+            // Recreate the piece location
+            long queenPosition = 1L << index;
+            long queenPositionReversed = BitMasks.reverse64bits(queenPosition);
+
+            // Get the masks
+            long rankMask = BitMasks.RANK[index];
+            long fileMask = BitMasks.FILE[index];
+            long diagonalMask = BitMasks.DIAG[index];
+            long antiDiagonalMask = BitMasks.ANTIDIAG[index];
+
+            // search Horizontally / in the Rank
+            long occupiedRank = ALL_PIECES & rankMask;
+            long occupiedRankReversed = BitMasks.reverse64bits(occupiedRank);
+            long horizontalMoves = ((occupiedRank - (2 * queenPosition)) ^ BitMasks.reverse64bits(occupiedRankReversed - 2 * queenPositionReversed)) & rankMask;
+            // search Vertically / in the File
+            long occupiedFile = ALL_PIECES & fileMask;
+            long occupiedFileReversed = BitMasks.reverse64bits(occupiedFile);
+            long verticalMoves = ((occupiedFile - (2 * queenPosition)) ^ BitMasks.reverse64bits(occupiedFileReversed - 2 * queenPositionReversed)) & fileMask;
+            // search Horizontally / in the Rank
+            long occupiedDiagonal = ALL_PIECES & diagonalMask;
+            long occupiedDiagonalReversed = BitMasks.reverse64bits(occupiedDiagonal);
+            long diagonalMoves = ((occupiedDiagonal - (2 * queenPosition)) ^ BitMasks.reverse64bits(occupiedDiagonalReversed - 2 * queenPositionReversed)) & diagonalMask;
+            // search Horizontally / in the Rank
+            long occupiedAntiDiagonal = ALL_PIECES & antiDiagonalMask;
+            long occupiedAntiDiagonalReversed = BitMasks.reverse64bits(occupiedAntiDiagonal);
+            long antiDiagonalMoves = ((occupiedAntiDiagonal - (2 * queenPosition)) ^ BitMasks.reverse64bits(occupiedAntiDiagonalReversed - 2 * queenPositionReversed)) & antiDiagonalMask;
+
+
+            long moves = horizontalMoves | verticalMoves | diagonalMoves | antiDiagonalMoves;
+            moves = moves & ~WHITE_PIECES;
+
+
+            List<String> destinationsStr = bitboardToNotation(moves);
+            String startingLocations = indexToNotation(index);
+            for(var s : destinationsStr){
+                possibleMoves.add(startingLocations + s);
+            }
+            trails = trails >>> shift; // traverse the empty space
+            trails = trails >>> 1; // get onto the next index
+            index++;
+        }
+
+
+
         Collections.sort(possibleMoves);
         return possibleMoves;
     }

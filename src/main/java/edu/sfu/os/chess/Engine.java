@@ -1,5 +1,7 @@
 package edu.sfu.os.chess;
 
+import java.util.List;
+
 /**
  * Entry point for the engine.
  *
@@ -13,6 +15,7 @@ public class Engine
 
     public static void main( String[] args )
     {
+        BitMasks.initBitMasks();
         currentPosition = BoardGeneration.initiateStandardChess();
     }
 }
