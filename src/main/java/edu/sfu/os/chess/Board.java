@@ -18,7 +18,15 @@ public class Board {
     public long BQ=0L;
     public long BK=0L;
 
-    public Board(){};
+    private boolean whiteKingMoved = false;
+    private boolean whiteARookMoved = false;
+    private boolean whiteHRookMoved = false;
+
+    private boolean blackKingMoved = false;
+    private boolean blackARookMoved = false;
+    private boolean blackHRookMoved = false;
+
+    public Board(){}
 
     public Board(long WP, long WN, long WB, long WR, long WQ, long WK, long BP, long BN, long BB, long BR, long BQ, long BK) {
         this.WP = WP;
@@ -33,5 +41,53 @@ public class Board {
         this.BR = BR;
         this.BQ = BQ;
         this.BK = BK;
+    }
+
+    public boolean whiteKingMoved() {
+        return whiteKingMoved;
+    }
+
+    public boolean whiteARookMoved() {
+        return whiteARookMoved;
+    }
+
+    public boolean whiteHRookMoved() {
+        return whiteHRookMoved;
+    }
+
+    public boolean blackKingMoved() {
+        return blackKingMoved;
+    }
+
+    public boolean blackARookMoved() {
+        return blackARookMoved;
+    }
+
+    public boolean blackHRookMoved() {
+        return blackHRookMoved;
+    }
+
+    public void setWhiteKingMoved() {
+        this.whiteKingMoved = true;
+    }
+
+    public void setWhiteARookMoved() {
+        this.whiteARookMoved = true;
+    }
+
+    public void setWhiteHRookMoved() {
+        this.whiteHRookMoved = true;
+    }
+
+    public void setBlackKingMoved() {
+        this.blackKingMoved = true;
+    }
+
+    public void setBlackARookMoved() {
+        this.blackARookMoved = true;
+    }
+
+    public void setBlackHRookMoved() {
+        this.blackHRookMoved = true;
     }
 }

@@ -104,6 +104,117 @@ public class Moves {
         return possibleMoves;
     }
 
+    public static boolean whiteKingSafety(int kingIndex, Board currentPosition){
+        long BP = currentPosition.BP;
+        long BN = currentPosition.BN;
+        long BB = currentPosition.BB;
+        long BR = currentPosition.BR;
+        long BQ = currentPosition.BQ;
+        long BK = currentPosition.BK;
+        long WP = currentPosition.WP;
+        long WN = currentPosition.WN;
+        long WB = currentPosition.WB;
+        long WR = currentPosition.WR;
+        long WQ = currentPosition.WQ;
+
+
+        final long BLACK_PIECES = BP | BN | BB | BR | BQ | BK; // Black's current pieces position
+        final long WHITE_PIECES = WP | WN | WB | WR | WQ ; // White's current pieces position
+
+        long kingPosition = 1L << kingIndex; // currentPosition.WK; //
+
+        // check if can be attacked by pawn
+        /*
+         *  p*p
+         *  *K*
+         */
+        long capturedByLeft = kingPosition >> 9 & ~(BitMasks.FILE_H) & BP;
+        if(capturedByLeft != 0L){ return false; }
+
+        long capturedByRight = kingPosition >> 7 & ~(BitMasks.FILE_A) & BP;
+        if(capturedByRight != 0L){ return false; }
+
+        // check if can be attacked by knight
+        /*
+         *  * 7 * 0 *
+         *  6 * * * 1
+         *  * * K * *
+         *  5 * * * 2
+         *  * 4 * 3 *
+         */
+        long position0 = kingPosition >>> 15 & ~(BitMasks.FILE_A) & BN;
+        if(position0 != 0L){ return false; }
+
+        long position1 = kingPosition >>> 6 & ~(BitMasks.FILE_AB) & BN;
+        if(position1 != 0L){ return false; }
+
+        long position2 =kingPosition << 10 & ~(BitMasks.FILE_AB) & BN;
+        if(position2 != 0L){ return false; }
+
+        long position3 =kingPosition << 17 & ~(BitMasks.FILE_A) & BN;
+        if(position3 != 0L){ return false; }
+
+        long position4 =kingPosition << 15 & ~(BitMasks.FILE_H) & BN;
+        if(position4 != 0L){ return false; }
+
+        long position5 =kingPosition << 6 & ~(BitMasks.FILE_GH) & BN;
+        if(position5 != 0L){ return false; }
+
+        long position6 =kingPosition >>> 10 & ~(BitMasks.FILE_GH) & BN;
+        if(position6 != 0L){ return false; }
+
+        long position7 =kingPosition >>> 17 & ~(BitMasks.FILE_H) & BN;
+        if(position7 != 0L){ return false; }
+
+        // Sliding
+        long kingPositionReversed = BitMasks.reverse64bits(kingPosition);
+        final long ALL_PIECES = BP | BN | BB | BR | BQ | BK | WP | WN | WB | WR | WQ | kingPosition ;
+
+        // todo: possible improvement, since module approach is used, we may optimise so that the "reverse64bit" is called less/ and or later.
+
+        // search Vertically / in the File
+        long fileMask = BitMasks.FILE[kingIndex];
+
+        long occupiedFile = ALL_PIECES & fileMask;
+        long occupiedFileReversed = BitMasks.reverse64bits(occupiedFile);
+        long verticalMoves = ((occupiedFile - (2 * kingPosition)) ^ BitMasks.reverse64bits(occupiedFileReversed - 2 * kingPositionReversed)) & fileMask;
+
+        long attackByVertical = verticalMoves & BR | verticalMoves & BQ;
+        if(attackByVertical != 0L){ return false; }
+
+        // search Horizontally / in the Rank
+        long rankMask = BitMasks.RANK[kingIndex];
+
+        long occupiedRank = ALL_PIECES & rankMask;
+        long occupiedRankReversed = BitMasks.reverse64bits(occupiedRank);
+        long horizontalMoves = ((occupiedRank - (2 * kingPosition)) ^ BitMasks.reverse64bits(occupiedRankReversed - 2 * kingPositionReversed)) & rankMask;
+
+        long attackByHorizontal = horizontalMoves & BR | horizontalMoves & BQ;
+        if(attackByHorizontal != 0L){ return false; }
+
+        // search Diagonally
+        long diagonalMask = BitMasks.DIAG[kingIndex];
+
+        long occupiedDiagonal = ALL_PIECES & diagonalMask;
+        long occupiedDiagonalReversed = BitMasks.reverse64bits(occupiedDiagonal);
+        long diagonalMoves = ((occupiedDiagonal - (2 * kingPosition)) ^ BitMasks.reverse64bits(occupiedDiagonalReversed - 2 * kingPositionReversed)) & diagonalMask;
+
+        long attackByDiagonal = diagonalMoves & BB | diagonalMoves & BQ;
+        if(attackByDiagonal != 0L){ return false; }
+
+        // search AntiDiagonally
+        long antiDiagonalMask = BitMasks.ANTIDIAG[kingIndex];
+
+        long occupiedAntiDiagonal = ALL_PIECES & antiDiagonalMask;
+        long occupiedAntiDiagonalReversed = BitMasks.reverse64bits(occupiedAntiDiagonal);
+        long antiDiagonalMoves = ((occupiedAntiDiagonal - (2 * kingPosition)) ^ BitMasks.reverse64bits(occupiedAntiDiagonalReversed - 2 * kingPositionReversed)) & antiDiagonalMask;
+
+        long attackByAntiDiagonal = antiDiagonalMoves & BB | antiDiagonalMoves & BQ;
+        if(attackByAntiDiagonal != 0L){ return false; }
+
+        return true;
+    }
+
     // Moves Generation
     public static List<String> generateMovesWP(long lastBP,Board currentPosition) {
 
@@ -251,6 +362,27 @@ public class Moves {
             for (var s : end) {
                 possibleMoves.add(start + s);
             }
+
+            // Castling
+            // King-Side
+            if(!currentPosition.whiteKingMoved() && !currentPosition.whiteHRookMoved()){
+                if(whiteKingSafety(index + 1, currentPosition)){
+                    if(whiteKingSafety(index + 2, currentPosition)){
+                        possibleMoves.add("e1g1c");
+                    }
+                }
+            }
+            // Queen-Side
+            if(!currentPosition.whiteKingMoved() && !currentPosition.whiteHRookMoved()){
+                if(whiteKingSafety(index - 1, currentPosition)){
+                    if(whiteKingSafety(index - 2, currentPosition)){
+                        if(whiteKingSafety(index - 3, currentPosition)){
+                            possibleMoves.add("e1c1c");
+                        }
+                    }
+                }
+            }
+
             trails = trails >>> Long.numberOfTrailingZeros(trails);
             trails = trails >>> 1;
             index++;
@@ -465,11 +597,11 @@ public class Moves {
             long occupiedFile = ALL_PIECES & fileMask;
             long occupiedFileReversed = BitMasks.reverse64bits(occupiedFile);
             long verticalMoves = ((occupiedFile - (2 * queenPosition)) ^ BitMasks.reverse64bits(occupiedFileReversed - 2 * queenPositionReversed)) & fileMask;
-            // search Horizontally / in the Rank
+            // search Diagonally
             long occupiedDiagonal = ALL_PIECES & diagonalMask;
             long occupiedDiagonalReversed = BitMasks.reverse64bits(occupiedDiagonal);
             long diagonalMoves = ((occupiedDiagonal - (2 * queenPosition)) ^ BitMasks.reverse64bits(occupiedDiagonalReversed - 2 * queenPositionReversed)) & diagonalMask;
-            // search Horizontally / in the Rank
+            // search AntiDiagonally
             long occupiedAntiDiagonal = ALL_PIECES & antiDiagonalMask;
             long occupiedAntiDiagonalReversed = BitMasks.reverse64bits(occupiedAntiDiagonal);
             long antiDiagonalMoves = ((occupiedAntiDiagonal - (2 * queenPosition)) ^ BitMasks.reverse64bits(occupiedAntiDiagonalReversed - 2 * queenPositionReversed)) & antiDiagonalMask;
