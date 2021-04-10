@@ -23,27 +23,30 @@ public class BitMasks {
     static long[] ANTIDIAG;
 
 
+    /**
+     * Given a bitboard with 1 bit set, return an index that corresponds to the position of th bit
+     * with index  0 being the top left corner of a chess board     / Rank 8 File A
+     *  and index 63 being the bottom right corner of a chess board / Rank 1 File H
+     *
+     * if more than 1 bit is set, it will return the index of the smallest bit
+     *
+     * @param bitboard
+     * @return
+     */
     public static int getIndexFromBitboard(long bitboard){
         return Long.numberOfTrailingZeros(bitboard);
     }
 
-    public static int getRankFromBitboard(long bitboard){
-        // takes in a bitboard containing 1 single bit and return's it's Rank on the bitboard
-        int index = getIndexFromBitboard(bitboard);
-        return index / 8 + 1;
-    }
-
-    public static int getFileFromBitboard(long bitboard){
-        // takes in a bitboard containing 1 single bit and return's it's File on the bitboard
-        // where
-        // a = 1, h = 8
-        int index = getIndexFromBitboard(bitboard);
-        return index % 8 + 1;
-    }
-
+    /**
+     * Given a set of bits stored in a long variable, return the bit-reversed value in long
+     *
+     * uses Bit masks and swapping left and right
+     * with reference to method 4 from https://aticleworld.com/5-way-to-reverse-bits-of-an-integer/
+     *
+     * @param bits a set of bits stored in long
+     * @return the bit-reversed value in long
+     */
     public static long reverse64bits(long bits){
-        // uses Bit masks and swapping left and right
-        // method 4 from https://aticleworld.com/5-way-to-reverse-bits-of-an-integer/
 
         // bit masks used:
         /*  0x00000000FFFFFFFFL: 0000000000000000000000000000000011111111111111111111111111111111
@@ -63,7 +66,6 @@ public class BitMasks {
 
             0x5555555555555555L: 0101010101010101010101010101010101010101010101010101010101010101
             0xAAAAAAAAAAAAAAAAL: 1010101010101010101010101010101010101010101010101010101010101010
-
          */
         // each row swap bits in the two masks
         // in the end, all bits will be reversed
@@ -78,8 +80,14 @@ public class BitMasks {
         return bits;
     }
 
+    /**
+     * Converts a boolean array of bitmasks to a long
+     *
+     * @param arr a boolean array representing a bitmask
+     * @return a bitmask in long
+     */
     private static long convertMaskArray(boolean[] arr){
-        // Converts a boolean array of bitmasks to a long
+
         final int n = 64;
         long res = 0L;
         for(int i = n - 1; i >= 0; i--){
@@ -91,6 +99,12 @@ public class BitMasks {
         return res;
     }
 
+    /**
+     * Generates a set of file(vertical) bitMasks for each position(index)
+     * used in {@link #initBitMasks()}
+     *
+     * @return a set of file bitmask in an array of long
+     */
     private static long[] getFileMasks(){
         // Generates the file bitmasks
         final int n = 64;
@@ -116,6 +130,12 @@ public class BitMasks {
         return res;
     }
 
+    /**
+     * Generates a set of rank(vertical) bitMasks for each position(index)
+     * used in {@link #initBitMasks()}
+     *
+     * @return a set of rank bitmask in an array of long
+     */
     private static long[] getRankMasks(){
         // Generates the rank bitmasks
         final int n = 64;
@@ -141,6 +161,12 @@ public class BitMasks {
         return res;
     }
 
+    /**
+     * Generates a set of diagonal bitMasks for each position(index)
+     * used in {@link #initBitMasks()}
+     *
+     * @return a set of diagonal bitmask in an array of long
+     */
     private static long[] getDiagMasks(){
         // Generates the diag bitmasks
         final int n = 64;
@@ -166,6 +192,12 @@ public class BitMasks {
         return res;
     }
 
+    /**
+     * Generates a set of anti-diagonal bitMasks for each position(index)
+     * used in {@link #initBitMasks()}
+     *
+     * @return a set of anti-diagonal bitmask in an array of long
+     */
     private static long[] getAntiDiagMasks(){
         // Generates the anti-diag bitmasks
         final int n = 64;
@@ -191,6 +223,10 @@ public class BitMasks {
         return res;
     }
 
+    /**
+     * Initializes the long arrays of bitMasks for used
+     * should be called before usage of this class, ideally on start/initialization of application
+     */
     public static void initBitMasks(){
         FILE = getFileMasks();
         RANK = getRankMasks();

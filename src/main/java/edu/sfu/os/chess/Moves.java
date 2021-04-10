@@ -6,7 +6,11 @@ import java.util.List;
 
 public class Moves {
 
-
+    /**
+     * Given an Board, returns all possible moves for white
+     *
+     * @return returns all possible moves for white
+     */
     public static List<String> generateAllWhiteMoves(Board currentPosition, long lastBP){
 
         List<String> whiteMoves = new ArrayList<>();
@@ -22,21 +26,36 @@ public class Moves {
     }
 
     // Helper functions for generating result Strings from derived Bitboards
-    private static String indexToNotation(long ind){
+    /**
+     * Given an index number, returns a string denoting the corresponding rank and file on the chess board
+     *
+     * @param index represents a position on the chess board
+     *
+     * @return a string denoting the corresponding rank and file
+     */
+    private static String indexToNotation(long index){
         // Given an index number, returns the coordinate of the index number
-        char file = (char)('a' + ind % 8);
-        long rank = 8 - ind/8;
+        char file = (char)('a' + index % 8);
+        long rank = 8 - index/8;
         return ("" + file + rank);
     }
 
-    private static List<String> indexToNotationOffset(long ind, int offset){
-        // Used by the pawn
-        // Given an index number, returns the notation. Offset denotes the starting position of the piece.
+    /**
+     * Given an index number, returns all possible notations with promotion taking in account.
+     * Used by {@link #bitboardToNotationWithOffset(long, int)}
+     *
+     * @param index is the destination of a move
+     * @param offset is used to calculate the the starting index of the piece, where starting index = index + offset
+     *
+     * @return 4 possible moves if there is promotion and 1 otherwise in string
+     */
+    private static List<String> indexToNotationWithOffset(long index, int offset){
+        
         List<String> possibleMoves = new ArrayList<>();
-        char startFile = (char)('a' + (ind + offset) % 8);
-        long startRank = 8 - (ind + offset) / 8;
-        char endFile = (char)('a' + ind % 8);
-        long endRank = 8 - ind / 8;
+        char startFile = (char)('a' + (index + offset) % 8);
+        long startRank = 8 - (index + offset) / 8;
+        char endFile = (char)('a' + index % 8);
+        long endRank = 8 - index / 8;
 
         // handle promotions
         if(endRank == 8 || endRank == 1){
@@ -52,8 +71,13 @@ public class Moves {
         return possibleMoves;
     }
 
+    /**
+     * Given a bit board, returns a list of notations (with rank and file, eg. "e1e2") for moves in a list of string.
+     * @param bb a input bit board
+     *
+     * @return a list of rank and file position in a list of string
+     */
     private static List<String> bitboardToNotation(long bb){
-        // Given a bit board, returns a list of all coordinates marked
         List<String> coordinates = new ArrayList<>();
         if(bb == 0){
             // Empty board
@@ -77,10 +101,16 @@ public class Moves {
         return coordinates;
     }
 
-    private static List<String> bitboardToNotationOffset(long bb, int offset){
-        // Used by the pawn
-        // Given a bit board, returns a list of all coordinates marked.
-        // Offset denotes the starting position of the piece.
+    /**
+     * Given a bit board, returns a list of notations (with rank and file, eg. "e1e2") for moves in a list of string.
+     *
+     * @param bb a bit board that marks all possible move destinations from an original position(from offset)
+     * @param offset denotes the amount of shift required for a destination index to get a piece's original position.
+     *
+     * @return a list of rank and file position in a list of string
+     */
+    private static List<String> bitboardToNotationWithOffset(long bb, int offset){
+
         List<String> possibleMoves = new ArrayList<>();
         if(bb == 0){
             // Empty board
@@ -95,7 +125,7 @@ public class Moves {
             int shift = Long.numberOfTrailingZeros(trails);
             // Get index of next marked coordinate
             index += shift;
-            possibleMoves.addAll(indexToNotationOffset(index, offset));
+            possibleMoves.addAll(indexToNotationWithOffset(index, offset));
             // Split the shift up, to avoid shifting by 64 bits
             trails = trails >>> shift;
             trails = trails >>> 1;
@@ -104,6 +134,25 @@ public class Moves {
         return possibleMoves;
     }
 
+    /**
+     * Given a Chess Board Object, checks whether the white king is safe from being checked by Black pieces
+     * calls {@link #whiteKingSafety(int, Board)} with the white king position on the Board current Position
+     *
+     * @param currentPosition a Chess Board
+     *
+     * @return a boolean to indicate whether the white king is safe on this board
+     */
+    public static boolean whiteKingSafety(Board currentPosition){
+        return whiteKingSafety(BitMasks.getIndexFromBitboard(currentPosition.WK),currentPosition);
+    }
+    /**
+     * Given a Chess Board Object and a position of white king, checks whether the white king is safe from being checked by Black pieces
+     *
+     * @param currentPosition a Chess Board
+     * @param kingIndex an index representing a position of white king
+     *
+     * @return a boolean to indicate whether the white king is safe
+     */
     public static boolean whiteKingSafety(int kingIndex, Board currentPosition){
         long BP = currentPosition.BP;
         long BN = currentPosition.BN;
@@ -117,11 +166,7 @@ public class Moves {
         long WR = currentPosition.WR;
         long WQ = currentPosition.WQ;
 
-
-        final long BLACK_PIECES = BP | BN | BB | BR | BQ | BK; // Black's current pieces position
-        final long WHITE_PIECES = WP | WN | WB | WR | WQ ; // White's current pieces position
-
-        long kingPosition = 1L << kingIndex; // currentPosition.WK; //
+        long kingPosition = 1L << kingIndex;
 
         // check if can be attacked by pawn
         /*
@@ -249,10 +294,10 @@ public class Moves {
         long captureLeft = WP >> 9 & (BLACK_PIECES | enPassant >> 8) & ~(BitMasks.FILE_H);
         long captureRight = WP >> 7 & (BLACK_PIECES | enPassant >> 8) & ~(BitMasks.FILE_A);
 
-        possibleMoves.addAll(bitboardToNotationOffset(moveUpOne, 8));
-        possibleMoves.addAll(bitboardToNotationOffset(moveUpTwo, 16));
-        possibleMoves.addAll(bitboardToNotationOffset(captureLeft, 9));
-        possibleMoves.addAll(bitboardToNotationOffset(captureRight, 7));
+        possibleMoves.addAll(bitboardToNotationWithOffset(moveUpOne, 8));
+        possibleMoves.addAll(bitboardToNotationWithOffset(moveUpTwo, 16));
+        possibleMoves.addAll(bitboardToNotationWithOffset(captureLeft, 9));
+        possibleMoves.addAll(bitboardToNotationWithOffset(captureRight, 7));
 
         Collections.sort(possibleMoves);
         return possibleMoves;
@@ -356,6 +401,8 @@ public class Moves {
             moves |= (kingPosition << 7 & ~(WHITE_PIECES | BitMasks.FILE_H));
             moves |= (kingPosition << 8 & ~(WHITE_PIECES));
             moves |= (kingPosition << 9 & ~(WHITE_PIECES | BitMasks.FILE_A));
+
+            BoardGeneration.drawBitboard(moves);
 
             List<String> end = bitboardToNotation(moves);
             String start = indexToNotation(index);
