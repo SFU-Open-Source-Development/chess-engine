@@ -80,6 +80,25 @@ public class MovesTest {
         System.out.println(String.join(", ", arr));
 
     }
+    @Test
+    public void testGenerateCastlingKingWhite(){
+
+        String[][] chessBoard ={
+                {" ","n","b","q","k","b"," "," "},
+                {" ","P"," ","p","R"," ","P"," "},
+                {" "," "," "," "," ","b"," "," "},
+                {" ","p","b","B","p","P"," "," "},
+                {" "," ","p","P"," "," "," "," "},
+                {" "," "," "," "," "," "," "," "},
+                {"P"," ","R","R","R","R","p","P"},
+                {"N"," "," "," ","K"," "," ","N"}};
+
+        System.out.println(" a  b  c  d  e  f  g  h ");
+        Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
+        List<String> arr = generateMovesWK(currentPosition);
+        System.out.println(String.join(", ", arr));
+
+    }
 
     @Test
     public void testGenerateMovesRookWhite(){
@@ -164,4 +183,7 @@ public class MovesTest {
         List<String> arr = Moves.generateMovesWQ(currentPosition);
         System.out.println(arr);
     }
+
+
+
 }
