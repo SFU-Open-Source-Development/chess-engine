@@ -44,6 +44,29 @@ public class Board {
         this.BQ = BQ;
         this.BK = BK;
     }
+    public Board(Board currPosition){
+        this.WP = currPosition.WP;
+        this.WN = currPosition.WN;
+        this.WB = currPosition.WB;
+        this.WR = currPosition.WR;
+        this.WQ = currPosition.WQ;
+        this.WK = currPosition.WK;
+        this.BP = currPosition.BP;
+        this.BN = currPosition.BN;
+        this.BB = currPosition.BB;
+        this.BR = currPosition.BR;
+        this.BQ = currPosition.BQ;
+        this.BK = currPosition.BK;
+        this.lastMove = currPosition.lastMove;
+
+        this.whiteKingMoved = currPosition.whiteKingMoved;
+        this.whiteARookMoved = currPosition.whiteARookMoved;
+        this.whiteHRookMoved = currPosition.whiteARookMoved;
+
+        this.blackKingMoved = currPosition.blackKingMoved;
+        this.blackARookMoved = currPosition.blackARookMoved;
+        this.blackHRookMoved = currPosition.blackHRookMoved;
+    }
 
     public boolean whiteKingMoved() {
         return whiteKingMoved;

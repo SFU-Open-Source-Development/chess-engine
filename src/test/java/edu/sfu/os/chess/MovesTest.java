@@ -154,4 +154,29 @@ public class MovesTest{
             BoardGeneration.drawBitboard(bb);
         }
     }
+
+    @Test
+    public void testMoves(){
+
+        String[][] chessBoard ={
+                {" ","n","b","q","k","b"," "," "},
+                {" ","P"," ","p","R"," ","P"," "},
+                {" "," "," "," "," ","b"," "," "},
+                {" ","p","b","Q","p","P"," "," "},
+                {" "," ","p","P"," "," "," "," "},
+                {" "," "," "," "," "," "," "," "},
+                {"P"," ","R"," "," "," ","p","P"},
+                {" ","N","B","Q"," ","B","R","B"}};
+
+        System.out.println(" a  b  c  d  e  f  g  h ");
+        Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
+
+        List<Long> arr = generateMovesWB(currentPosition);
+        for(var bb : arr){
+            System.out.println(" a  b  c  d  e  f  g  h ");
+            BoardGeneration.drawBitboard(bb);
+            System.out.println(" a  b  c  d  e  f  g  h ");
+            BoardGeneration.drawArray(moveWhite(currentPosition, bb));
+        }
+    }
 }

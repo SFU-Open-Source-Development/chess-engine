@@ -1043,4 +1043,64 @@ public class Moves {
         }
         return possibleMoves;
     }
+
+    public static Board moveWhite(Board currentPosition, long moveMask){
+        Board newBoard = new Board(currentPosition);
+        if((newBoard.WP & moveMask) != 0){
+            newBoard.WP ^= moveMask;
+        }
+        else if((newBoard.WN & moveMask) != 0){
+            newBoard.WN ^= moveMask;
+        }
+        else if((newBoard.WB & moveMask) != 0){
+            newBoard.WB ^= moveMask;
+        }
+        else if((newBoard.WR & moveMask) != 0){
+            newBoard.WR ^= moveMask;
+        }
+        else if((newBoard.WQ & moveMask) != 0){
+            newBoard.WQ ^= moveMask;
+        }
+        else{
+            newBoard.WK ^= moveMask;
+        }
+        newBoard.BP &= ~moveMask;
+        newBoard.BN &= ~moveMask;
+        newBoard.BB &= ~moveMask;
+        newBoard.BR &= ~moveMask;
+        newBoard.BQ &= ~moveMask;
+        newBoard.BK &= ~moveMask;
+        newBoard.lastMove = moveMask;
+        return newBoard;
+    }
+
+    public static Board moveBlack(Board currentPosition, long moveMask){
+        Board newBoard = new Board(currentPosition);
+        if((newBoard.BP & moveMask) != 0){
+            newBoard.BP ^= moveMask;
+        }
+        else if((newBoard.BN & moveMask) != 0){
+            newBoard.BN ^= moveMask;
+        }
+        else if((newBoard.BB & moveMask) != 0){
+            newBoard.BB ^= moveMask;
+        }
+        else if((newBoard.BR & moveMask) != 0){
+            newBoard.BR ^= moveMask;
+        }
+        else if((newBoard.BQ & moveMask) != 0){
+            newBoard.BQ ^= moveMask;
+        }
+        else{
+            newBoard.BK ^= moveMask;
+        }
+        newBoard.WP &= ~moveMask;
+        newBoard.WN &= ~moveMask;
+        newBoard.WB &= ~moveMask;
+        newBoard.WR &= ~moveMask;
+        newBoard.WQ &= ~moveMask;
+        newBoard.WK &= ~moveMask;
+        newBoard.lastMove = moveMask;
+        return newBoard;
+    }
 }
