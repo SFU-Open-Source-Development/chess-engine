@@ -6,12 +6,12 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static edu.sfu.os.chess.Moves.*;
+import static edu.sfu.os.chess.MovesAsStrings.*;
 
 /**
- * Unit test for Moves
+ * Unit test for MovesAsStrings
  */
-public class MovesTest{
+public class MovesAsStringsTest {
 
     /**
      * This is run before running other tests
@@ -37,11 +37,9 @@ public class MovesTest{
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
         currentPosition.lastMove = BitMasks.RANK_1 >>> 48 | BitMasks.RANK_1 >>> 32;
-        List<Long> arr = generateMovesWP(currentPosition);
-        for(var bb : arr){
-            System.out.println(" a  b  c  d  e  f  g  h ");
-            BoardGeneration.drawBitboard(bb);
-        }
+        List<String> arr = generateMovesWPAsStrings(currentPosition);
+        System.out.println(String.join(", ", arr));
+
     }
 
     @Test
@@ -59,11 +57,9 @@ public class MovesTest{
 
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
-        List<Long> arr = generateMovesWN(currentPosition);
-        for(var bb : arr){
-            System.out.println(" a  b  c  d  e  f  g  h ");
-            BoardGeneration.drawBitboard(bb);
-        }
+        List<String> arr = generateMovesWNAsStrings(currentPosition);
+        System.out.println(String.join(", ", arr));
+
     }
 
     @Test
@@ -81,12 +77,30 @@ public class MovesTest{
 
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
-        List<Long> arr = generateMovesWK(currentPosition);
-        for(var bb : arr){
-            System.out.println(" a  b  c  d  e  f  g  h ");
-            BoardGeneration.drawBitboard(bb);
-        }
+        List<String> arr = generateMovesWKAsStrings(currentPosition);
+        System.out.println(String.join(", ", arr));
+
     }
+    @Test
+    public void testGenerateCastlingKingWhite(){
+
+        String[][] chessBoard ={
+                {" ","n","b","q","k","b"," "," "},
+                {" ","P"," ","p","R"," ","P"," "},
+                {" "," "," "," "," ","b"," "," "},
+                {" ","p","b","B","p","P"," "," "},
+                {" "," ","p","P"," "," "," "," "},
+                {" "," "," "," "," "," "," "," "},
+                {"P"," ","R","R","R","R","p","P"},
+                {"N"," "," "," ","K"," "," ","N"}};
+
+        System.out.println(" a  b  c  d  e  f  g  h ");
+        Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
+        List<String> arr = generateMovesWKAsStrings(currentPosition);
+        System.out.println(String.join(", ", arr));
+
+    }
+
     @Test
     public void testGenerateMovesRookWhite(){
 
@@ -102,11 +116,9 @@ public class MovesTest{
 
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
-        List<Long> arr = generateMovesWR(currentPosition);
-        for(var bb : arr){
-            System.out.println(" a  b  c  d  e  f  g  h ");
-            BoardGeneration.drawBitboard(bb);
-        }
+
+        List<String> arr = generateMovesWRAsStrings(currentPosition);
+        System.out.println(arr);
     }
 
     @Test
@@ -125,11 +137,8 @@ public class MovesTest{
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
 
-        List<Long> arr = generateMovesWB(currentPosition);
-        for(var bb : arr){
-            System.out.println(" a  b  c  d  e  f  g  h ");
-            BoardGeneration.drawBitboard(bb);
-        }
+        List<String> arr = generateMovesWBAsStrings(currentPosition);
+        System.out.println(arr);
     }
 
     @Test
@@ -148,10 +157,31 @@ public class MovesTest{
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
 
-        List<Long> arr = generateMovesWQ(currentPosition);
-        for(var bb : arr){
-            System.out.println(" a  b  c  d  e  f  g  h ");
-            BoardGeneration.drawBitboard(bb);
+        List<String> arr = generateMovesWQAsStrings(currentPosition);
+        System.out.println(arr);
+    }
+
+    @Test
+    public void testBitMasks(){
+
+        BitMasks.initBitMasks();
+
+        final int n = 64;
+        for(int i = 0; i < n; i++){
+            System.out.printf("File Index %d\n", i);
+            BoardGeneration.drawBitboard(BitMasks.FILE[i]);
+        }
+        for(int i = 0; i < n; i++){
+            System.out.printf("Rank Index %d\n", i);
+            BoardGeneration.drawBitboard(BitMasks.RANK[i]);
+        }
+        for(int i = 0; i < n; i++){
+            System.out.printf("Diag Index %d\n", i);
+            BoardGeneration.drawBitboard(BitMasks.DIAG[i]);
+        }
+        for(int i = 0; i < n; i++){
+            System.out.printf("AntiDiag Index %d\n", i);
+            BoardGeneration.drawBitboard(BitMasks.ANTIDIAG[i]);
         }
     }
 }

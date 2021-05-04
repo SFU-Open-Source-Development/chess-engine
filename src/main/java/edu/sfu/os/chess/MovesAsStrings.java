@@ -1,85 +1,126 @@
 package edu.sfu.os.chess;
 
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class Moves {
+public class MovesAsStrings {
 
     /**
      * Given an Board and last position of black pawns, returns all possible moves for white
      *
      * @return returns all possible moves for white
      */
-    public static List<Long> generateAllWhiteMoves(Board currentPosition){
+    public static List<String> generateAllWhiteMovesAsStrings(Board currentPosition){
 
-        List<Long> whiteMoves = new ArrayList<>();
+        List<String> whiteMoves = new ArrayList<>();
 
-        whiteMoves.addAll(generateMovesWP(currentPosition));
-        whiteMoves.addAll(generateMovesWN(currentPosition));
-        whiteMoves.addAll(generateMovesWK(currentPosition));
-        whiteMoves.addAll(generateMovesWR(currentPosition));
-        whiteMoves.addAll(generateMovesWB(currentPosition));
-        whiteMoves.addAll(generateMovesWQ(currentPosition));
+        whiteMoves.addAll(generateMovesWPAsStrings(currentPosition));
+        whiteMoves.addAll(generateMovesWNAsStrings(currentPosition));
+        whiteMoves.addAll(generateMovesWKAsStrings(currentPosition));
+        whiteMoves.addAll(generateMovesWRAsStrings(currentPosition));
+        whiteMoves.addAll(generateMovesWBAsStrings(currentPosition));
+        whiteMoves.addAll(generateMovesWQAsStrings(currentPosition));
 
         return whiteMoves;
     }
-
     /**
      * Given an Board and last position of white pawns, returns all possible moves for black
      *
      * @return returns all possible moves for black
      */
-    public static List<Long> generateAllBlackMoves(Board currentPosition){
+    public static List<String> generateAllBlackMovesAsStrings(Board currentPosition){
 
-        List<Long> blackMoves = new ArrayList<>();
+        List<String> blackMoves = new ArrayList<>();
 
-        blackMoves.addAll(generateMovesBP(currentPosition));
-        blackMoves.addAll(generateMovesBN(currentPosition));
-        blackMoves.addAll(generateMovesBK(currentPosition));
-        blackMoves.addAll(generateMovesBR(currentPosition));
-        blackMoves.addAll(generateMovesBB(currentPosition));
-        blackMoves.addAll(generateMovesBQ(currentPosition));
+        blackMoves.addAll(generateMovesBPAsStrings(currentPosition));
+        blackMoves.addAll(generateMovesBNAsStrings(currentPosition));
+        blackMoves.addAll(generateMovesBKAsStrings(currentPosition));
+        blackMoves.addAll(generateMovesBRAsStrings(currentPosition));
+        blackMoves.addAll(generateMovesBBAsStrings(currentPosition));
+        blackMoves.addAll(generateMovesBQAsStrings(currentPosition));
 
         return blackMoves;
     }
 
+    // Helper functions for generating result Strings from derived Bitboards
     /**
-     * Given a bit board, returns a list of bitmasks
+     * Given an index number, returns a string denoting the corresponding rank and file on the chess board
      *
-     * @param bb a bit board that marks all possible move destinations from originalPosition
-     * @param originalPosition denotes a bitmask of the start location of the piece
+     * @param index represents a position on the chess board
      *
-     * @return a list of move bitmasks
+     * @return a string denoting the corresponding rank and file
      */
-    private static List<Long> bitboardToBitMask(long bb, long originalPosition){
+    private static String indexToNotation(int index){
+        // Given an index number, returns the coordinate of the index number
+        char file = (char)('a' + index % 8);
+        long rank = 8 - index/8;
+        return ("" + file + rank);
+    }
 
-        List<Long> possibleMoves = new ArrayList<>();
-        if(bb == 0){
-            // Empty board
-            return possibleMoves;
+    /**
+     * Given an index number, returns all possible notations with promotion taking in account.
+     * Used by {@link #bitboardToNotationWithOffset(long, int)}
+     *
+     * @param index is the destination of a move
+     * @param offset is used to calculate the the starting index of the piece, where starting index = index + offset
+     *
+     * @return 4 possible moves if there is promotion and 1 otherwise in string
+     */
+    private static List<String> indexToNotationWithOffset(int index, int offset){
+        
+        List<String> possibleMoves = new ArrayList<>();
+        char startFile = (char)('a' + (index + offset) % 8);
+        long startRank = 8 - (index + offset) / 8;
+        char endFile = (char)('a' + index % 8);
+        long endRank = 8 - index / 8;
+
+        // handle promotions
+        if(endRank == 8 || endRank == 1){
+            possibleMoves.add("" + startFile + startRank + endFile + endRank + "q");
+            possibleMoves.add("" + startFile + startRank + endFile + endRank + "r");
+            possibleMoves.add("" + startFile + startRank + endFile + endRank + "b");
+            possibleMoves.add("" + startFile + startRank + endFile + endRank + "n");
         }
-        while(bb != 0){
-            // Get index of next piece
-            int index = Long.numberOfTrailingZeros(bb);
-            long pieceMask = 1L << index;
-            possibleMoves.add(pieceMask | originalPosition);
-            bb ^= pieceMask;
+        else{
+            possibleMoves.add("" + startFile + startRank + endFile + endRank);
         }
+
         return possibleMoves;
     }
 
     /**
-     * Given a bit board, returns a list of bitmasks
+     * Given a bit board, returns a list of notations (with rank and file, eg. "e1e2") for moves in a list of string.
+     * @param bb a input bit board
+     *
+     * @return a list of rank and file position in a list of string
+     */
+    private static List<String> bitboardToNotation(long bb){
+        List<String> coordinates = new ArrayList<>();
+        if(bb == 0){
+            // Empty board
+            return coordinates;
+        }
+        while(bb != 0){
+            // Get index of next piece
+            int index = Long.numberOfTrailingZeros(bb);
+            coordinates.add(indexToNotation(index));
+            bb ^= (1L << index);
+        }
+        return coordinates;
+    }
+
+    /**
+     * Given a bit board, returns a list of notations (with rank and file, eg. "e1e2") for moves in a list of string.
      *
      * @param bb a bit board that marks all possible move destinations from an original position(from offset)
      * @param offset denotes the amount of shift required for a destination index to get a piece's original position.
      *
-     * @return a list of move bitmasks
+     * @return a list of rank and file position in a list of string
      */
-    private static List<Long> bitboardToBitMaskWithOffset(long bb, int offset){
+    private static List<String> bitboardToNotationWithOffset(long bb, int offset){
 
-        List<Long> possibleMoves = new ArrayList<>();
+        List<String> possibleMoves = new ArrayList<>();
         if(bb == 0){
             // Empty board
             return possibleMoves;
@@ -87,9 +128,8 @@ public class Moves {
         while(bb != 0){
             // Get index of next piece
             int index = Long.numberOfTrailingZeros(bb);
-            long pieceMask = 1L << index;
-            possibleMoves.add(pieceMask | (1L >>> offset));
-            bb ^= pieceMask;
+            possibleMoves.addAll(indexToNotationWithOffset(index, offset));
+            bb ^= (1L << index);
         }
         return possibleMoves;
     }
@@ -105,7 +145,6 @@ public class Moves {
     public static boolean whiteKingSafety(Board currentPosition){
         return whiteKingSafety(BitMasks.getIndexFromBitboard(currentPosition.WK),currentPosition);
     }
-
     /**
      * Given a Chess Board Object and a position of white king, checks whether the white king is safe from being checked by Black pieces
      *
@@ -343,7 +382,7 @@ public class Moves {
     }
 
     // Moves Generation
-    public static List<Long> generateMovesWP(Board currentPosition) {
+    public static List<String> generateMovesWPAsStrings(Board currentPosition) {
 
         // Retrieve bitmap from Board;
         long BP = currentPosition.BP;
@@ -368,27 +407,27 @@ public class Moves {
         final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
         final long ALL_PIECES = WHITE_PIECES | BLACK_PIECES;
 
-        List<Long> possibleMoves = new ArrayList<>();
+        List<String> possibleMoves = new ArrayList<>();
 
         // moves
         long moveUpOne = WP>>>8 & ~(ALL_PIECES); // check for 1 step up
         long moveUpTwo = (WP&WP_INITIAL)>>16 & ~((ALL_PIECES) | ((ALL_PIECES) << 8) ) ; // check for 2 steps up
         // En passant
-        // TODO: Separate out enPassant to a different function
         long enPassant = BP & (lastMove & BP_INITIAL) << 16;
         // Attacks
         long captureLeft = WP >>> 9 & (BLACK_PIECES | enPassant >>> 8) & ~(BitMasks.FILE_H);
         long captureRight = WP >>> 7 & (BLACK_PIECES | enPassant >>> 8) & ~(BitMasks.FILE_A);
 
-        possibleMoves.addAll(bitboardToBitMaskWithOffset(moveUpOne, 8));
-        possibleMoves.addAll(bitboardToBitMaskWithOffset(moveUpTwo, 16));
-        possibleMoves.addAll(bitboardToBitMaskWithOffset(captureLeft, 9));
-        possibleMoves.addAll(bitboardToBitMaskWithOffset(captureRight, 7));
+        possibleMoves.addAll(bitboardToNotationWithOffset(moveUpOne, 8));
+        possibleMoves.addAll(bitboardToNotationWithOffset(moveUpTwo, 16));
+        possibleMoves.addAll(bitboardToNotationWithOffset(captureLeft, 9));
+        possibleMoves.addAll(bitboardToNotationWithOffset(captureRight, 7));
 
+        Collections.sort(possibleMoves);
         return possibleMoves;
     }
 
-    public static List<Long> generateMovesWN(Board currentPosition) {
+    public static List<String> generateMovesWNAsStrings(Board currentPosition) {
         // Retrieve bitmap from Board;
         long WP = currentPosition.WP;
         long WN = currentPosition.WN;
@@ -399,7 +438,7 @@ public class Moves {
 
         final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
 
-        List<Long> possibleMoves = new ArrayList<>();
+        List<String> possibleMoves = new ArrayList<>();
 
         if(WN == 0){
             // No knight exists
@@ -422,7 +461,7 @@ public class Moves {
              *  6 * * * 2
              *  * 5 * 4 *
              */
-            moves |= (knightPosition >>> 15 & ~(WHITE_PIECES | BitMasks.FILE_A));
+
             moves |= (knightPosition >>> 15 & ~(WHITE_PIECES | BitMasks.FILE_A));
             moves |= (knightPosition >>> 6 & ~(WHITE_PIECES | BitMasks.FILE_AB));
             moves |= (knightPosition << 10 & ~(WHITE_PIECES | BitMasks.FILE_AB));
@@ -432,14 +471,18 @@ public class Moves {
             moves |= (knightPosition >>> 10 & ~(WHITE_PIECES | BitMasks.FILE_GH));
             moves |= (knightPosition >>> 17 & ~(WHITE_PIECES | BitMasks.FILE_H));
 
-            possibleMoves.addAll(bitboardToBitMask(moves, knightPosition));
+            List<String> end = bitboardToNotation(moves);
+            String start = indexToNotation(index);
+            for(var s : end){
+                possibleMoves.add(start + s);
+            }
             bb ^= pieceMask;
         }
+        Collections.sort(possibleMoves);
         return possibleMoves;
     }
 
-    public static List<Long> generateMovesWK(Board currentPosition) {
-        // TODO: NO CASTLING
+    public static List<String> generateMovesWKAsStrings(Board currentPosition) {
         // Retrieve bitmap from Board;
         long WP = currentPosition.WP;
         long WN = currentPosition.WN;
@@ -450,7 +493,7 @@ public class Moves {
 
         final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
 
-        List<Long> possibleMoves = new ArrayList<>();
+        List<String> possibleMoves = new ArrayList<>();
 
         if (WK == 0) {
             // No king exists
@@ -480,13 +523,36 @@ public class Moves {
             moves |= (kingPosition << 8 & ~(WHITE_PIECES));
             moves |= (kingPosition << 9 & ~(WHITE_PIECES | BitMasks.FILE_A));
 
-            possibleMoves.addAll(bitboardToBitMask(moves, kingPosition));
+            List<String> end = bitboardToNotation(moves);
+            String start = indexToNotation(index);
+            for (var s : end) {
+                possibleMoves.add(start + s);
+            }
+
+            // Castling
+            // King-Side
+            if(!currentPosition.whiteKingMoved() && !currentPosition.whiteHRookMoved()){
+                if(whiteKingSafety(index + 1, currentPosition)){
+                    if(whiteKingSafety(index + 2, currentPosition)){
+                        possibleMoves.add("e1g1c");
+                    }
+                }
+            }
+            // Queen-Side
+            if(!currentPosition.whiteKingMoved() && !currentPosition.whiteHRookMoved()){
+                if(whiteKingSafety(index - 1, currentPosition)){
+                    if(whiteKingSafety(index - 2, currentPosition)){
+                        possibleMoves.add("e1c1c");
+                    }
+                }
+            }
             bb ^= pieceMask;
         }
+
         return possibleMoves;
     }
 
-    public static List<Long> generateMovesWR(Board currentPosition){
+    public static List<String> generateMovesWRAsStrings(Board currentPosition){
         // Retrieve bitmap from Board;
         long BP = currentPosition.BP;
         long BN = currentPosition.BN;
@@ -505,7 +571,7 @@ public class Moves {
         final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
         final long ALL_PIECES = BLACK_PIECES | WHITE_PIECES;
 
-        List<Long> possibleMoves = new ArrayList<>();
+        List<String> possibleMoves = new ArrayList<>();
         /*
             reference: https://www.youtube.com/watch?v=bCH4YK6oq8M&ab_channel=LogicCrazyChess
 
@@ -550,13 +616,18 @@ public class Moves {
             long moves = horizontalMoves | verticalMoves;
             moves = moves & ~WHITE_PIECES;
 
-            possibleMoves.addAll(bitboardToBitMask(moves, rookPosition));
+            List<String> end = bitboardToNotation(moves);
+            String start = indexToNotation(index);
+            for(var s : end){
+                possibleMoves.add(start + s);
+            }
             bb ^= pieceMask;
         }
+        Collections.sort(possibleMoves);
         return possibleMoves;
     }
 
-    public static List<Long> generateMovesWB(Board currentPosition){
+    public static List<String> generateMovesWBAsStrings(Board currentPosition){
         // Retrieve bitmap from Board;
         long BP = currentPosition.BP;
         long BN = currentPosition.BN;
@@ -575,7 +646,7 @@ public class Moves {
         final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
         final long ALL_PIECES = BLACK_PIECES | WHITE_PIECES;
 
-        List<Long> possibleMoves = new ArrayList<>();
+        List<String> possibleMoves = new ArrayList<>();
         /*
             reference: https://www.youtube.com/watch?v=bCH4YK6oq8M&ab_channel=LogicCrazyChess
 
@@ -620,13 +691,18 @@ public class Moves {
             long moves = diagMoves | antiDiagMoves;
             moves = moves & ~WHITE_PIECES;
 
-            possibleMoves.addAll(bitboardToBitMask(moves, bishopPosition));
+            List<String> end = bitboardToNotation(moves);
+            String start = indexToNotation(index);
+            for(var s : end){
+                possibleMoves.add(start + s);
+            }
             bb ^= pieceMask;
         }
+        Collections.sort(possibleMoves);
         return possibleMoves;
     }
 
-    public static List<Long> generateMovesWQ(Board currentPosition){
+    public static List<String> generateMovesWQAsStrings(Board currentPosition){
         // Retrieve bitmap from Board;
         long BP = currentPosition.BP;
         long BN = currentPosition.BN;
@@ -645,7 +721,7 @@ public class Moves {
         final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
         final long ALL_PIECES = BLACK_PIECES | WHITE_PIECES;
 
-        List<Long> possibleMoves = new ArrayList<>();
+        List<String> possibleMoves = new ArrayList<>();
 
         if(WQ == 0){
             // No Queen exist exists
@@ -687,13 +763,18 @@ public class Moves {
             long moves = horizontalMoves | verticalMoves | diagonalMoves | antiDiagonalMoves;
             moves = moves & ~WHITE_PIECES;
 
-            possibleMoves.addAll(bitboardToBitMask(moves, queenPosition));
+            List<String> destinationsStr = bitboardToNotation(moves);
+            String startingLocations = indexToNotation(index);
+            for(var s : destinationsStr){
+                possibleMoves.add(startingLocations + s);
+            }
             bb ^= pieceMask;
         }
+        Collections.sort(possibleMoves);
         return possibleMoves;
     }
 
-    public static List<Long> generateMovesBP(Board currentPosition) {
+    public static List<String> generateMovesBPAsStrings(Board currentPosition) {
 
         // Retrieve bitmap from Board;
         long BP = currentPosition.BP;
@@ -718,28 +799,28 @@ public class Moves {
         final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
         final long ALL_PIECES = BLACK_PIECES | WHITE_PIECES;
 
-        List<Long> possibleMoves = new ArrayList<>();
+        List<String> possibleMoves = new ArrayList<>();
 
         // moves
         long moveDownOne = BP<<8 & ~(ALL_PIECES); // check for 1 step up
         long moveDownTwo = (BP&BP_INITIAL)<<16 & ~((ALL_PIECES) | ((ALL_PIECES) << 8)) ; // check for 2 steps down
         // En passant
-        // TODO: Separate out enPassant to a different function
-        long enPassant = WP & (lastMove & WP_INITIAL) >>> 16;
+        long enPassant = WP & (lastMove & WP_INITIAL) >> 16;
         // Attacks
         long captureLeft = BP << 7 & (WHITE_PIECES | enPassant << 8) & ~(BitMasks.FILE_A);
         long captureRight = BP << 9 & (WHITE_PIECES | enPassant << 8) & ~(BitMasks.FILE_H);
 
 
-        possibleMoves.addAll(bitboardToBitMaskWithOffset(moveDownOne, -8));
-        possibleMoves.addAll(bitboardToBitMaskWithOffset(moveDownTwo, -16));
-        possibleMoves.addAll(bitboardToBitMaskWithOffset(captureLeft, -7));
-        possibleMoves.addAll(bitboardToBitMaskWithOffset(captureRight, -9));
+        possibleMoves.addAll(bitboardToNotationWithOffset(moveDownOne, -8));
+        possibleMoves.addAll(bitboardToNotationWithOffset(moveDownTwo, -16));
+        possibleMoves.addAll(bitboardToNotationWithOffset(captureLeft, -7));
+        possibleMoves.addAll(bitboardToNotationWithOffset(captureRight, -9));
 
+        Collections.sort(possibleMoves);
         return possibleMoves;
     }
 
-    public static List<Long> generateMovesBN(Board currentPosition) {
+    public static List<String> generateMovesBNAsStrings(Board currentPosition) {
         // Retrieve bitmap from Board;
         long BP = currentPosition.BP;
         long BN = currentPosition.BN;
@@ -750,7 +831,7 @@ public class Moves {
 
         final long BLACK_PIECES = BP | BN | BB | BR | BQ | BK; // Black's current pieces position
 
-        List<Long> possibleMoves = new ArrayList<>();
+        List<String> possibleMoves = new ArrayList<>();
 
         if(BN == 0){
             // No knight exists
@@ -783,14 +864,18 @@ public class Moves {
             moves |= (knightPosition >>> 10 & ~(BLACK_PIECES | BitMasks.FILE_GH));
             moves |= (knightPosition >>> 17 & ~(BLACK_PIECES | BitMasks.FILE_H));
 
-            possibleMoves.addAll(bitboardToBitMask(moves, knightPosition));
+            List<String> end = bitboardToNotation(moves);
+            String start = indexToNotation(index);
+            for(var s : end){
+                possibleMoves.add(start + s);
+            }
             bb ^= pieceMask;
         }
+        Collections.sort(possibleMoves);
         return possibleMoves;
     }
 
-    public static List<Long> generateMovesBK(Board currentPosition) {
-        // TODO: NO CASTLING
+    public static List<String> generateMovesBKAsStrings(Board currentPosition) {
         // Retrieve bitmap from Board;
         long BP = currentPosition.BP;
         long BN = currentPosition.BN;
@@ -801,12 +886,13 @@ public class Moves {
 
         final long BLACK_PIECES = BP | BN | BB | BR | BQ | BK; // Black's current pieces position
 
-        List<Long> possibleMoves = new ArrayList<>();
+        List<String> possibleMoves = new ArrayList<>();
 
         if (BK == 0) {
             // No king exists
             return possibleMoves;
         }
+
         long bb = BK;
         while(bb != 0){
             // Get index of next piece
@@ -831,13 +917,38 @@ public class Moves {
             moves |= (kingPosition << 8 & ~(BLACK_PIECES));
             moves |= (kingPosition << 9 & ~(BLACK_PIECES | BitMasks.FILE_A));
 
-            possibleMoves.addAll(bitboardToBitMask(moves, kingPosition));
+            List<String> end = bitboardToNotation(moves);
+            String start = indexToNotation(index);
+            for (var s : end) {
+                possibleMoves.add(start + s);
+            }
+
+            // Castling
+            // King-Side
+            if(!currentPosition.blackKingMoved() && !currentPosition.blackHRookMoved()){
+                if(blackKingSafety(index + 1, currentPosition)){
+                    if(blackKingSafety(index + 2, currentPosition)){
+                        possibleMoves.add("e8g8");
+                    }
+                }
+            }
+            // Queen-Side
+            if(!currentPosition.blackKingMoved() && !currentPosition.blackHRookMoved()){
+                if(blackKingSafety(index - 1, currentPosition)){
+                    if(blackKingSafety(index - 2, currentPosition)){
+                        if(blackKingSafety(index - 3, currentPosition)){
+                            possibleMoves.add("e8c8");
+                        }
+                    }
+                }
+            }
             bb ^= pieceMask;
         }
+        Collections.sort(possibleMoves);
         return possibleMoves;
     }
 
-    public static List<Long> generateMovesBR(Board currentPosition){
+    public static List<String> generateMovesBRAsStrings(Board currentPosition){
         // Retrieve bitmap from Board;
         long BP = currentPosition.BP;
         long BN = currentPosition.BN;
@@ -856,7 +967,7 @@ public class Moves {
         final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
         final long ALL_PIECES = BLACK_PIECES | WHITE_PIECES;
 
-        List<Long> possibleMoves = new ArrayList<>();
+        List<String> possibleMoves = new ArrayList<>();
         /*
             reference: https://www.youtube.com/watch?v=bCH4YK6oq8M&ab_channel=LogicCrazyChess
 
@@ -901,13 +1012,18 @@ public class Moves {
             long moves = horizontalMoves | verticalMoves;
             moves = moves & ~BLACK_PIECES;
 
-            possibleMoves.addAll(bitboardToBitMask(moves, rookPosition));
+            List<String> end = bitboardToNotation(moves);
+            String start = indexToNotation(index);
+            for(var s : end){
+                possibleMoves.add(start + s);
+            }
             bb ^= pieceMask;
         }
+        Collections.sort(possibleMoves);
         return possibleMoves;
     }
 
-    public static List<Long> generateMovesBB(Board currentPosition){
+    public static List<String> generateMovesBBAsStrings(Board currentPosition){
         // Retrieve bitmap from Board;
         long BP = currentPosition.BP;
         long BN = currentPosition.BN;
@@ -926,7 +1042,7 @@ public class Moves {
         final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
         final long ALL_PIECES = BLACK_PIECES | WHITE_PIECES;
 
-        List<Long> possibleMoves = new ArrayList<>();
+        List<String> possibleMoves = new ArrayList<>();
         /*
             reference: https://www.youtube.com/watch?v=bCH4YK6oq8M&ab_channel=LogicCrazyChess
 
@@ -971,13 +1087,18 @@ public class Moves {
             long moves = diagMoves | antiDiagMoves;
             moves = moves & ~BLACK_PIECES;
 
-            possibleMoves.addAll(bitboardToBitMask(moves, bishopPosition));
+            List<String> end = bitboardToNotation(moves);
+            String start = indexToNotation(index);
+            for(var s : end){
+                possibleMoves.add(start + s);
+            }
             bb ^= pieceMask;
         }
+        Collections.sort(possibleMoves);
         return possibleMoves;
     }
 
-    public static List<Long> generateMovesBQ(Board currentPosition){
+    public static List<String> generateMovesBQAsStrings(Board currentPosition){
         // Retrieve bitmap from Board;
         long BP = currentPosition.BP;
         long BN = currentPosition.BN;
@@ -996,7 +1117,7 @@ public class Moves {
         final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
         final long ALL_PIECES = BLACK_PIECES | WHITE_PIECES;
 
-        List<Long> possibleMoves = new ArrayList<>();
+        List<String> possibleMoves = new ArrayList<>();
 
         if(BQ == 0){
             // No Queen exist exists
@@ -1038,9 +1159,14 @@ public class Moves {
             long moves = horizontalMoves | verticalMoves | diagonalMoves | antiDiagonalMoves;
             moves = moves & ~BLACK_PIECES;
 
-            possibleMoves.addAll(bitboardToBitMask(moves, queenPosition));
+            List<String> destinationsStr = bitboardToNotation(moves);
+            String startingLocations = indexToNotation(index);
+            for(var s : destinationsStr){
+                possibleMoves.add(startingLocations + s);
+            }
             bb ^= pieceMask;
         }
+        Collections.sort(possibleMoves);
         return possibleMoves;
     }
 }

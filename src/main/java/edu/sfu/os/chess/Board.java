@@ -18,6 +18,8 @@ public class Board {
     public long BQ=0L;
     public long BK=0L;
 
+    public long lastMove=0L;
+
     private boolean whiteKingMoved = false;
     private boolean whiteARookMoved = false;
     private boolean whiteHRookMoved = false;
