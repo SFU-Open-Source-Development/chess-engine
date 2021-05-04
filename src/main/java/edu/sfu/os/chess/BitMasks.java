@@ -26,6 +26,11 @@ public class BitMasks {
     static final long B_Q_Castle_Inter = 28L;
     static final long W_K_Castle_Inter = 8070450532247928832L;
     static final long W_Q_Castle_Inter = 2017612633061982208L;
+    // Mask to check for blocking piece during castling
+    static final long B_K_Castle_Block = 96L;
+    static final long B_Q_Castle_Block = 14L;
+    static final long W_K_Castle_Block = 6917529027641081856L;
+    static final long W_Q_Castle_Block = 1008806316530991104L;
     // Mask of piece movement for castling
     static final long BK_K_Castle_Move = 80L;
     static final long BR_K_Castle_Move = -96L;

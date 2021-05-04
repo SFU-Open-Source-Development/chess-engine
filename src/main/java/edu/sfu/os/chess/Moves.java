@@ -89,7 +89,39 @@ public class Moves {
             // Get index of next piece
             int index = Long.numberOfTrailingZeros(bb);
             long pieceMask = 1L << index;
-            possibleMoves.add(pieceMask | (1L >>> offset));
+            possibleMoves.add(pieceMask | (pieceMask << offset));
+            bb ^= pieceMask;
+        }
+        return possibleMoves;
+    }
+
+    /**
+     * Given a bit board, returns a list of bitmasks with promotion flag
+     *
+     * @param bb a bit board that marks all possible move destinations from an original position(from offset)
+     * @param offset denotes the amount of shift required for a destination index to get a piece's original position.
+     *
+     * @return a list of move bitmasks and promotion type
+     */
+    private static List<List<Long>> bitboardToBitMaskWithOffsetPromotion(long bb, int offset){
+
+        // 0 = Knight
+        // 1 = Bishop
+        // 2 = Rook
+        // 3 = Queen
+        List<List<Long>> possibleMoves = new ArrayList<>();
+        if(bb == 0){
+            // Empty board
+            return possibleMoves;
+        }
+        while(bb != 0){
+            // Get index of next piece
+            int index = Long.numberOfTrailingZeros(bb);
+            long pieceMask = 1L << index;
+            for(long i = 0; i < 4; i++){
+                List<Long> pair = List.of(pieceMask | (pieceMask << offset), i);
+                possibleMoves.add(pair);
+            }
             bb ^= pieceMask;
         }
         return possibleMoves;
@@ -444,10 +476,6 @@ public class Moves {
         long WQ = currentPosition.WQ;
         long WK = currentPosition.WK;
 
-        long lastMove = currentPosition.lastMove;
-
-
-        final long BP_INITIAL = BitMasks.RANK_1 >>> 48; // Black's initial pawn position
         final long WP_INITIAL = BitMasks.RANK_1 >>> 8; // white's initial pawn position
         final long BLACK_PIECES = BP | BN | BB | BR | BQ | BK; // Black's current pieces position
         final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
@@ -456,11 +484,11 @@ public class Moves {
         List<Long> possibleMoves = new ArrayList<>();
 
         // moves
-        long moveUpOne = WP>>>8 & ~(ALL_PIECES); // check for 1 step up
-        long moveUpTwo = (WP&WP_INITIAL)>>16 & ~((ALL_PIECES) | ((ALL_PIECES) << 8) ) ; // check for 2 steps up
+        long moveUpOne = WP >>> 8 & ~(ALL_PIECES) & ~(BitMasks.RANK_8); // check for 1 step up, remove pieces that hit promotion
+        long moveUpTwo = (WP & WP_INITIAL) >> 16 & ~((ALL_PIECES) | ((ALL_PIECES) << 8) ) ; // check for 2 steps up
         // Attacks
-        long captureLeft = WP >>> 9 & BLACK_PIECES & ~(BitMasks.FILE_H);
-        long captureRight = WP >>> 7 & BLACK_PIECES & ~(BitMasks.FILE_A);
+        long captureLeft = WP >>> 9 & BLACK_PIECES & ~(BitMasks.FILE_H) & ~(BitMasks.RANK_8);
+        long captureRight = WP >>> 7 & BLACK_PIECES & ~(BitMasks.FILE_A) & ~(BitMasks.RANK_8);
 
         possibleMoves.addAll(bitboardToBitMaskWithOffset(moveUpOne, 8));
         possibleMoves.addAll(bitboardToBitMaskWithOffset(moveUpTwo, 16));
@@ -811,12 +839,12 @@ public class Moves {
 
         // Castling
         // King-Side
-        if((currentPosition.castleCheck & BitMasks.W_K_Castle) == 0 && (BitMasks.W_K_Castle_Inter & (unsafeSquares | (ALL_PIECES ^ WK))) == 0){
+        if((currentPosition.castleCheck & BitMasks.W_K_Castle) == 0 && (BitMasks.W_K_Castle_Inter & unsafeSquares) == 0 && (BitMasks.W_K_Castle_Block & ALL_PIECES) == 0){
             List<Long> pair = List.of(BitMasks.WK_K_Castle_Move, BitMasks.WR_K_Castle_Move);
             possibleMoves.add(pair);
         }
         // Queen-Side
-        if((currentPosition.castleCheck & BitMasks.W_Q_Castle) == 0 && (BitMasks.W_Q_Castle_Inter & (unsafeSquares | (ALL_PIECES ^ WK))) == 0){
+        if((currentPosition.castleCheck & BitMasks.W_Q_Castle) == 0 && (BitMasks.W_Q_Castle_Inter & unsafeSquares) == 0 && (BitMasks.W_Q_Castle_Block & ALL_PIECES) == 0){
             List<Long> pair = List.of(BitMasks.WK_Q_Castle_Move, BitMasks.WR_Q_Castle_Move);
             possibleMoves.add(pair);
         }
@@ -853,6 +881,41 @@ public class Moves {
         return possibleMoves;
     }
 
+    public static List<List<Long>> generateMovesWPromotion(Board currentPosition){
+
+        // Retrieve bitmap from Board;
+        long BP = currentPosition.BP;
+        long BN = currentPosition.BN;
+        long BB = currentPosition.BB;
+        long BR = currentPosition.BR;
+        long BQ = currentPosition.BQ;
+        long BK = currentPosition.BK;
+        long WP = currentPosition.WP;
+        long WN = currentPosition.WN;
+        long WB = currentPosition.WB;
+        long WR = currentPosition.WR;
+        long WQ = currentPosition.WQ;
+        long WK = currentPosition.WK;
+
+        final long BLACK_PIECES = BP | BN | BB | BR | BQ | BK; // Black's current pieces position
+        final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
+        final long ALL_PIECES = BLACK_PIECES | WHITE_PIECES;
+
+        List<List<Long>> possibleMoves = new ArrayList<>();
+
+        // moves
+        long moveUpOne = WP >>> 8 & ~(ALL_PIECES) & BitMasks.RANK_8; // check for 1 step up
+        // Attacks
+        long captureLeft = WP >>> 9 & BLACK_PIECES & ~(BitMasks.FILE_H) & BitMasks.RANK_8;
+        long captureRight = WP >>> 7 & BLACK_PIECES & ~(BitMasks.FILE_A) & BitMasks.RANK_8;
+
+        possibleMoves.addAll(bitboardToBitMaskWithOffsetPromotion(moveUpOne, 8));
+        possibleMoves.addAll(bitboardToBitMaskWithOffsetPromotion(captureLeft, 9));
+        possibleMoves.addAll(bitboardToBitMaskWithOffsetPromotion(captureRight, 7));
+
+        return possibleMoves;
+    }
+
     public static List<Long> generateMovesBP(Board currentPosition){
 
         // Retrieve bitmap from Board;
@@ -869,11 +932,7 @@ public class Moves {
         long WQ = currentPosition.WQ;
         long WK = currentPosition.WK;
 
-        long lastMove = currentPosition.lastMove;
-
-
         final long BP_INITIAL = BitMasks.RANK_1 >>> 48; // Black's initial pawn position
-        final long WP_INITIAL = BitMasks.RANK_1 >>> 8; // white's initial pawn position
         final long BLACK_PIECES = BP | BN | BB | BR | BQ | BK; // Black's current pieces position
         final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
         final long ALL_PIECES = BLACK_PIECES | WHITE_PIECES;
@@ -881,11 +940,11 @@ public class Moves {
         List<Long> possibleMoves = new ArrayList<>();
 
         // moves
-        long moveDownOne = BP<<8 & ~(ALL_PIECES); // check for 1 step up
-        long moveDownTwo = (BP&BP_INITIAL)<<16 & ~((ALL_PIECES) | ((ALL_PIECES) << 8)) ; // check for 2 steps down
+        long moveDownOne = BP << 8 & ~(ALL_PIECES) & ~(BitMasks.RANK_1); // check for 1 step up, remove pieces that hit promotion
+        long moveDownTwo = (BP & BP_INITIAL) << 16 & ~((ALL_PIECES) | ((ALL_PIECES) << 8)) ; // check for 2 steps down
         // Attacks
-        long captureLeft = BP << 7 & WHITE_PIECES & ~(BitMasks.FILE_H);
-        long captureRight = BP << 9 & WHITE_PIECES & ~(BitMasks.FILE_A);
+        long captureLeft = BP << 7 & WHITE_PIECES & ~(BitMasks.FILE_H) & ~(BitMasks.RANK_1);
+        long captureRight = BP << 9 & WHITE_PIECES & ~(BitMasks.FILE_A) & ~(BitMasks.RANK_1);
 
 
         possibleMoves.addAll(bitboardToBitMaskWithOffset(moveDownOne, -8));
@@ -1237,12 +1296,12 @@ public class Moves {
 
         // Castling
         // King-Side
-        if((currentPosition.castleCheck & BitMasks.B_K_Castle) == 0 && (BitMasks.B_K_Castle_Inter & (unsafeSquares | (ALL_PIECES ^ BK))) == 0){
+        if((currentPosition.castleCheck & BitMasks.B_K_Castle) == 0 && (BitMasks.B_K_Castle_Inter & unsafeSquares) == 0 && (BitMasks.B_K_Castle_Block & ALL_PIECES) == 0){
             List<Long> pair = List.of(BitMasks.BK_K_Castle_Move, BitMasks.BR_K_Castle_Move);
             possibleMoves.add(pair);
         }
         // Queen-Side
-        if((currentPosition.castleCheck & BitMasks.B_Q_Castle) == 0 && (BitMasks.B_Q_Castle_Inter & (unsafeSquares | (ALL_PIECES ^ BK))) == 0){
+        if((currentPosition.castleCheck & BitMasks.B_Q_Castle) == 0 && (BitMasks.B_Q_Castle_Inter & unsafeSquares) == 0 && (BitMasks.B_Q_Castle_Block & ALL_PIECES) == 0){
             List<Long> pair = List.of(BitMasks.BK_Q_Castle_Move, BitMasks.BR_Q_Castle_Move);
             possibleMoves.add(pair);
         }
@@ -1275,6 +1334,41 @@ public class Moves {
                 possibleMoves.add(pair);
             }
         }
+
+        return possibleMoves;
+    }
+
+    public static List<List<Long>> generateMovesBPromotion(Board currentPosition){
+
+        // Retrieve bitmap from Board;
+        long BP = currentPosition.BP;
+        long BN = currentPosition.BN;
+        long BB = currentPosition.BB;
+        long BR = currentPosition.BR;
+        long BQ = currentPosition.BQ;
+        long BK = currentPosition.BK;
+        long WP = currentPosition.WP;
+        long WN = currentPosition.WN;
+        long WB = currentPosition.WB;
+        long WR = currentPosition.WR;
+        long WQ = currentPosition.WQ;
+        long WK = currentPosition.WK;
+
+        final long BLACK_PIECES = BP | BN | BB | BR | BQ | BK; // Black's current pieces position
+        final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
+        final long ALL_PIECES = BLACK_PIECES | WHITE_PIECES;
+
+        List<List<Long>> possibleMoves = new ArrayList<>();
+
+        // moves
+        long moveDownOne = BP << 8 & ~(ALL_PIECES) & BitMasks.RANK_1; // check for 1 step up
+        // Attacks
+        long captureLeft = BP << 7 & WHITE_PIECES & ~(BitMasks.FILE_H) & BitMasks.RANK_1;
+        long captureRight = BP << 9 & WHITE_PIECES & ~(BitMasks.FILE_A) & BitMasks.RANK_1;
+
+        possibleMoves.addAll(bitboardToBitMaskWithOffsetPromotion(moveDownOne, -8));
+        possibleMoves.addAll(bitboardToBitMaskWithOffsetPromotion(captureLeft, -7));
+        possibleMoves.addAll(bitboardToBitMaskWithOffsetPromotion(captureRight, -9));
 
         return possibleMoves;
     }
@@ -1382,6 +1476,54 @@ public class Moves {
         newBoard.BP ^= move;
         newBoard.WP &= ~capture;
         newBoard.lastMove = move;
+        return newBoard;
+    }
+
+    public static Board promotionWhite(Board currentPosition, List<Long> moveMask){
+        Board newBoard = new Board(currentPosition);
+        long move = moveMask.get(0);
+        long promotionType = moveMask.get(1);
+        long promotionMask = move & BitMasks.RANK_8;
+        newBoard.WP &= ~move;
+        newBoard.BN &= ~move;
+        newBoard.BB &= ~move;
+        newBoard.BR &= ~move;
+        newBoard.BQ &= ~move;
+        newBoard.BK &= ~move;
+        // 0 = Knight
+        // 1 = Bishop
+        // 2 = Rook
+        // 3 = Queen
+        switch ((int) promotionType) {
+            case 0 -> newBoard.WN |= promotionMask;
+            case 1 -> newBoard.WB |= promotionMask;
+            case 2 -> newBoard.WR |= promotionMask;
+            case 3 -> newBoard.WQ |= promotionMask;
+        }
+        return newBoard;
+    }
+
+    public static Board promotionBlack(Board currentPosition, List<Long> moveMask){
+        Board newBoard = new Board(currentPosition);
+        long move = moveMask.get(0);
+        long promotionType = moveMask.get(1);
+        long promotionMask = move & BitMasks.RANK_1;
+        newBoard.BP &= ~move;
+        newBoard.WN &= ~move;
+        newBoard.WB &= ~move;
+        newBoard.WR &= ~move;
+        newBoard.WQ &= ~move;
+        newBoard.WK &= ~move;
+        // 0 = Knight
+        // 1 = Bishop
+        // 2 = Rook
+        // 3 = Queen
+        switch ((int) promotionType) {
+            case 0 -> newBoard.BN |= promotionMask;
+            case 1 -> newBoard.BB |= promotionMask;
+            case 2 -> newBoard.BR |= promotionMask;
+            case 3 -> newBoard.BQ |= promotionMask;
+        }
         return newBoard;
     }
 }

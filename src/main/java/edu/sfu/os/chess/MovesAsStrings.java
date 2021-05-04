@@ -630,11 +630,11 @@ public class MovesAsStrings {
 
         // Castling
         // King-Side
-        if((currentPosition.castleCheck & BitMasks.W_K_Castle) == 0 && (BitMasks.W_K_Castle_Inter & (unsafeSquares | (ALL_PIECES ^ WK))) == 0){
+        if((currentPosition.castleCheck & BitMasks.W_K_Castle) == 0 && (BitMasks.W_K_Castle_Inter & unsafeSquares) == 0 && (BitMasks.W_K_Castle_Block & ALL_PIECES) == 0){
             possibleMoves.add("e1g1c");
         }
         // Queen-Side
-        if((currentPosition.castleCheck & BitMasks.W_Q_Castle) == 0 && (BitMasks.W_Q_Castle_Inter & (unsafeSquares | (ALL_PIECES ^ WK))) == 0){
+        if((currentPosition.castleCheck & BitMasks.W_Q_Castle) == 0 && (BitMasks.W_Q_Castle_Inter & unsafeSquares) == 0 && (BitMasks.W_Q_Castle_Block & ALL_PIECES) == 0){
             possibleMoves.add("e1c1c");
         }
         Collections.sort(possibleMoves);

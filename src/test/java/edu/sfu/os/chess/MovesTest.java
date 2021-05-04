@@ -182,22 +182,46 @@ public class MovesTest{
     }
 
     @Test
-    public void testMoves(){
+    public void testGeneratePromotionWhite(){
 
         String[][] chessBoard ={
-                {" ","n","b","q","k","b"," "," "},
-                {" ","P"," ","p","R"," ","P"," "},
+                {"r","n","b","q","k","b"," "," "},
+                {" ","P"," ","p"," "," ","P"," "},
                 {" "," "," "," "," ","b"," "," "},
-                {" ","p","b","Q","p","P"," "," "},
-                {" "," ","p","P"," "," "," "," "},
+                {" ","p","b"," ","p","P","p"," "},
+                {" "," ","P","P"," "," "," "," "},
                 {" "," "," "," "," "," "," "," "},
-                {"P"," ","R"," "," "," ","p","P"},
-                {" ","N","B","Q"," ","B","R","B"}};
+                {"P"," "," "," "," "," ","P","P"},
+                {"R","N","B","Q","K","B","N","R"}};
 
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
 
-        List<Long> arr = generateMovesWB(currentPosition);
+        List<List<Long>> arr = generateMovesWPromotion(currentPosition);
+        for(var e : arr){
+            System.out.println(" a  b  c  d  e  f  g  h ");
+            BoardGeneration.drawBitboard(e.get(0));
+        }
+
+    }
+
+    @Test
+    public void testMovesWhite(){
+
+        String[][] chessBoard ={
+                {"r","n","b","q","k","b"," "," "},
+                {" ","P"," ","p"," "," ","P"," "},
+                {" "," "," "," "," ","b"," "," "},
+                {" ","p","b"," ","p","P"," "," "},
+                {" "," ","P","P"," "," "," "," "},
+                {" "," "," "," "," "," "," "," "},
+                {"P"," "," "," "," "," ","P","P"},
+                {"R","N","B","Q","K","B","N","R"}};
+
+        System.out.println(" a  b  c  d  e  f  g  h ");
+        Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
+
+        List<Long> arr = generateMovesWP(currentPosition);
         for(var bb : arr){
             System.out.println(" a  b  c  d  e  f  g  h ");
             BoardGeneration.drawBitboard(bb);
@@ -207,7 +231,7 @@ public class MovesTest{
     }
 
     @Test
-    public void testCastle(){
+    public void testCastleWhite(){
 
         String[][] chessBoard ={
                 {" ","n","b","q","k","b"," "," "},
@@ -217,7 +241,7 @@ public class MovesTest{
                 {" "," ","p","P"," "," "," "," "},
                 {" "," "," "," "," "," "," "," "},
                 {"P"," ","R","R","R","R"," ","P"},
-                {"R"," "," "," ","K"," "," ","R"}};
+                {"R","B"," "," ","K"," "," ","R"}};
 
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
@@ -234,7 +258,7 @@ public class MovesTest{
     }
 
     @Test
-    public void testEnPassant(){
+    public void testEnPassantWhite(){
 
         String[][] chessBoard ={
                 {"r","n","b","q","k","b"," "," "},
@@ -258,6 +282,32 @@ public class MovesTest{
             }
             System.out.println(" a  b  c  d  e  f  g  h ");
             BoardGeneration.drawArray(enPassantWhite(currentPosition, e));
+        }
+
+    }
+
+    @Test
+    public void testPromotionWhite(){
+
+        String[][] chessBoard ={
+                {"r","n","b","q","k","b"," "," "},
+                {" ","P"," ","p"," "," ","P"," "},
+                {" "," "," "," "," ","b"," "," "},
+                {" ","p","b"," ","p","P","p"," "},
+                {" "," ","P","P"," "," "," "," "},
+                {" "," "," "," "," "," "," "," "},
+                {"P"," "," "," "," "," ","P","P"},
+                {"R","N","B","Q","K","B","N","R"}};
+
+        System.out.println(" a  b  c  d  e  f  g  h ");
+        Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
+
+        List<List<Long>> arr = generateMovesWPromotion(currentPosition);
+        for(var e : arr){
+            System.out.println(" a  b  c  d  e  f  g  h ");
+            BoardGeneration.drawBitboard(e.get(0));
+            System.out.println(" a  b  c  d  e  f  g  h ");
+            BoardGeneration.drawArray(promotionWhite(currentPosition, e));
         }
 
     }
