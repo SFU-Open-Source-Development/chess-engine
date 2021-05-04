@@ -3,14 +3,13 @@ package edu.sfu.os.chess;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Moves {
 
     /**
-     * Given an Board and last position of black pawns, returns all possible moves for white
+     * Given an Board, returns all possible basic for white
      *
-     * @return returns all possible moves for white
+     * @return returns all possible basic moves for white
      */
     public static List<Long> generateAllWhiteMoves(Board currentPosition){
 
@@ -26,10 +25,12 @@ public class Moves {
         return whiteMoves;
     }
 
+
+
     /**
-     * Given an Board and last position of white pawns, returns all possible moves for black
+     * Given an Board, returns all possible basic moves for black
      *
-     * @return returns all possible moves for black
+     * @return returns all possible basic moves for black
      */
     public static List<Long> generateAllBlackMoves(Board currentPosition){
 
@@ -829,22 +830,17 @@ public class Moves {
 
         List<List<Long>> possibleMoves = new ArrayList<>();
 
-        // Cannot castle
-        if((currentPosition.castleCheck & BitMasks.W_K_Castle) != 0 && (currentPosition.castleCheck & BitMasks.W_Q_Castle) != 0){
-            return possibleMoves;
-        }
-
         // Get mask of all unsafe squares
         long unsafeSquares = whiteKingSafety(currentPosition);
 
         // Castling
         // King-Side
-        if((currentPosition.castleCheck & BitMasks.W_K_Castle) == 0 && (BitMasks.W_K_Castle_Inter & unsafeSquares) == 0 && (BitMasks.W_K_Castle_Block & ALL_PIECES) == 0){
+        if((currentPosition.castleCheck & BitMasks.W_K_Castle) == 0 && (BitMasks.W_K_Castle_Block & ALL_PIECES) == 0 && (BitMasks.W_K_Castle_Inter & unsafeSquares) == 0){
             List<Long> pair = List.of(BitMasks.WK_K_Castle_Move, BitMasks.WR_K_Castle_Move);
             possibleMoves.add(pair);
         }
         // Queen-Side
-        if((currentPosition.castleCheck & BitMasks.W_Q_Castle) == 0 && (BitMasks.W_Q_Castle_Inter & unsafeSquares) == 0 && (BitMasks.W_Q_Castle_Block & ALL_PIECES) == 0){
+        if((currentPosition.castleCheck & BitMasks.W_Q_Castle) == 0 && (BitMasks.W_Q_Castle_Block & ALL_PIECES) == 0 && (BitMasks.W_Q_Castle_Inter & unsafeSquares) == 0){
             List<Long> pair = List.of(BitMasks.WK_Q_Castle_Move, BitMasks.WR_Q_Castle_Move);
             possibleMoves.add(pair);
         }
@@ -1286,22 +1282,17 @@ public class Moves {
 
         List<List<Long>> possibleMoves = new ArrayList<>();
 
-        // Cannot castle
-        if((currentPosition.castleCheck & BitMasks.B_K_Castle) != 0 && (currentPosition.castleCheck & BitMasks.B_Q_Castle) != 0){
-            return possibleMoves;
-        }
-
         // Get mask of all unsafe squares
         long unsafeSquares = blackKingSafety(currentPosition);
 
         // Castling
         // King-Side
-        if((currentPosition.castleCheck & BitMasks.B_K_Castle) == 0 && (BitMasks.B_K_Castle_Inter & unsafeSquares) == 0 && (BitMasks.B_K_Castle_Block & ALL_PIECES) == 0){
+        if((currentPosition.castleCheck & BitMasks.B_K_Castle) == 0 && (BitMasks.B_K_Castle_Block & ALL_PIECES) == 0 && (BitMasks.B_K_Castle_Inter & unsafeSquares) == 0){
             List<Long> pair = List.of(BitMasks.BK_K_Castle_Move, BitMasks.BR_K_Castle_Move);
             possibleMoves.add(pair);
         }
         // Queen-Side
-        if((currentPosition.castleCheck & BitMasks.B_Q_Castle) == 0 && (BitMasks.B_Q_Castle_Inter & unsafeSquares) == 0 && (BitMasks.B_Q_Castle_Block & ALL_PIECES) == 0){
+        if((currentPosition.castleCheck & BitMasks.B_Q_Castle) == 0 && (BitMasks.B_Q_Castle_Block & ALL_PIECES) == 0 && (BitMasks.B_Q_Castle_Inter & unsafeSquares) == 0){
             List<Long> pair = List.of(BitMasks.BK_Q_Castle_Move, BitMasks.BR_Q_Castle_Move);
             possibleMoves.add(pair);
         }
@@ -1386,14 +1377,12 @@ public class Moves {
         }
         else if((newBoard.WR & moveMask) != 0){
             newBoard.WR ^= moveMask;
-            newBoard.castleCheck |= moveMask;
         }
         else if((newBoard.WQ & moveMask) != 0){
             newBoard.WQ ^= moveMask;
         }
         else{
             newBoard.WK ^= moveMask;
-            newBoard.castleCheck |= moveMask;
         }
         newBoard.BP &= ~moveMask;
         newBoard.BN &= ~moveMask;
@@ -1402,6 +1391,7 @@ public class Moves {
         newBoard.BQ &= ~moveMask;
         newBoard.BK &= ~moveMask;
         newBoard.lastMove = moveMask;
+        newBoard.castleCheck |= moveMask;
         return newBoard;
     }
 
@@ -1418,14 +1408,12 @@ public class Moves {
         }
         else if((newBoard.BR & moveMask) != 0){
             newBoard.BR ^= moveMask;
-            newBoard.castleCheck |= moveMask;
         }
         else if((newBoard.BQ & moveMask) != 0){
             newBoard.BQ ^= moveMask;
         }
         else{
             newBoard.BK ^= moveMask;
-            newBoard.castleCheck |= moveMask;
         }
         newBoard.WP &= ~moveMask;
         newBoard.WN &= ~moveMask;
@@ -1434,6 +1422,7 @@ public class Moves {
         newBoard.WQ &= ~moveMask;
         newBoard.WK &= ~moveMask;
         newBoard.lastMove = moveMask;
+        newBoard.castleCheck |= moveMask;
         return newBoard;
     }
 
@@ -1442,9 +1431,9 @@ public class Moves {
         long kingMove = moveMask.get(0);
         long rookMove = moveMask.get(1);
         newBoard.WK ^= kingMove;
-        newBoard.castleCheck |= kingMove;
         newBoard.WR ^= rookMove;
         newBoard.lastMove = kingMove;
+        newBoard.castleCheck |= kingMove;
         return newBoard;
     }
 
@@ -1453,9 +1442,9 @@ public class Moves {
         long kingMove = moveMask.get(0);
         long rookMove = moveMask.get(1);
         newBoard.BK ^= kingMove;
-        newBoard.castleCheck |= kingMove;
         newBoard.BR ^= rookMove;
         newBoard.lastMove = kingMove;
+        newBoard.castleCheck |= kingMove;
         return newBoard;
     }
 
@@ -1466,6 +1455,7 @@ public class Moves {
         newBoard.WP ^= move;
         newBoard.BP &= ~capture;
         newBoard.lastMove = move;
+        newBoard.castleCheck |= move;
         return newBoard;
     }
 
@@ -1476,6 +1466,7 @@ public class Moves {
         newBoard.BP ^= move;
         newBoard.WP &= ~capture;
         newBoard.lastMove = move;
+        newBoard.castleCheck |= move;
         return newBoard;
     }
 
@@ -1500,6 +1491,8 @@ public class Moves {
             case 2 -> newBoard.WR |= promotionMask;
             case 3 -> newBoard.WQ |= promotionMask;
         }
+        newBoard.lastMove = move;
+        newBoard.castleCheck |= move;
         return newBoard;
     }
 
@@ -1524,6 +1517,8 @@ public class Moves {
             case 2 -> newBoard.BR |= promotionMask;
             case 3 -> newBoard.BQ |= promotionMask;
         }
+        newBoard.lastMove = move;
+        newBoard.castleCheck |= move;
         return newBoard;
     }
 }
