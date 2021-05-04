@@ -20,13 +20,13 @@ public class Board {
 
     public long lastMove=0L;
 
-    private boolean whiteKingMoved = false;
-    private boolean whiteARookMoved = false;
-    private boolean whiteHRookMoved = false;
-
-    private boolean blackKingMoved = false;
-    private boolean blackARookMoved = false;
-    private boolean blackHRookMoved = false;
+    /* To check if castle is valid
+     * Use an bit mask of the castling move (castleMask)
+     * if((castleCheck & castleMask) == 0) return true;
+     *
+     * castleCheck is updated with every rook/king move
+     */
+    public long castleCheck=0L;
 
     public Board(){}
 
@@ -57,62 +57,9 @@ public class Board {
         this.BR = currPosition.BR;
         this.BQ = currPosition.BQ;
         this.BK = currPosition.BK;
+
         this.lastMove = currPosition.lastMove;
 
-        this.whiteKingMoved = currPosition.whiteKingMoved;
-        this.whiteARookMoved = currPosition.whiteARookMoved;
-        this.whiteHRookMoved = currPosition.whiteARookMoved;
-
-        this.blackKingMoved = currPosition.blackKingMoved;
-        this.blackARookMoved = currPosition.blackARookMoved;
-        this.blackHRookMoved = currPosition.blackHRookMoved;
-    }
-
-    public boolean whiteKingMoved() {
-        return whiteKingMoved;
-    }
-
-    public boolean whiteARookMoved() {
-        return whiteARookMoved;
-    }
-
-    public boolean whiteHRookMoved() {
-        return whiteHRookMoved;
-    }
-
-    public boolean blackKingMoved() {
-        return blackKingMoved;
-    }
-
-    public boolean blackARookMoved() {
-        return blackARookMoved;
-    }
-
-    public boolean blackHRookMoved() {
-        return blackHRookMoved;
-    }
-
-    public void setWhiteKingMoved() {
-        this.whiteKingMoved = true;
-    }
-
-    public void setWhiteARookMoved() {
-        this.whiteARookMoved = true;
-    }
-
-    public void setWhiteHRookMoved() {
-        this.whiteHRookMoved = true;
-    }
-
-    public void setBlackKingMoved() {
-        this.blackKingMoved = true;
-    }
-
-    public void setBlackARookMoved() {
-        this.blackARookMoved = true;
-    }
-
-    public void setBlackHRookMoved() {
-        this.blackHRookMoved = true;
+        this.castleCheck = currPosition.castleCheck;
     }
 }

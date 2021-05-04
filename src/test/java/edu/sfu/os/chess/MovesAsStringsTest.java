@@ -26,9 +26,9 @@ public class MovesAsStringsTest {
 
         String[][] chessBoard ={
                 {"r","n","b","q","k","b"," "," "},
-                {" ","P"," ","p"," "," ","P"," "},
+                {" ","P"," ","p"," "," "," "," "},
                 {" "," "," "," "," ","b"," "," "},
-                {" ","p","b"," ","p","P"," "," "},
+                {" ","p","b"," ","p","P","p"," "},
                 {" "," ","P","P"," "," "," "," "},
                 {" "," "," "," "," "," "," "," "},
                 {"P"," "," "," "," "," ","P","P"},
@@ -36,7 +36,8 @@ public class MovesAsStringsTest {
 
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
-        currentPosition.lastMove = BitMasks.RANK_1 >>> 48 | BitMasks.RANK_1 >>> 32;
+        currentPosition.lastMove = (BitMasks.RANK_1 >>> 48 | BitMasks.RANK_1 >>> 32) & BitMasks.FILE_A << 6;
+        BoardGeneration.drawBitboard(currentPosition.lastMove);
         List<String> arr = generateMovesWPAsStrings(currentPosition);
         System.out.println(String.join(", ", arr));
 
@@ -88,11 +89,11 @@ public class MovesAsStringsTest {
                 {" ","n","b","q","k","b"," "," "},
                 {" ","P"," ","p","R"," ","P"," "},
                 {" "," "," "," "," ","b"," "," "},
-                {" ","p","b","B","p","P"," "," "},
+                {" ","p","b","B","p","P","r"," "},
                 {" "," ","p","P"," "," "," "," "},
                 {" "," "," "," "," "," "," "," "},
-                {"P"," ","R","R","R","R","p","P"},
-                {"N"," "," "," ","K"," "," ","N"}};
+                {"P"," ","R","R","R","R"," ","P"},
+                {"R"," "," "," ","K"," "," ","R"}};
 
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
@@ -116,7 +117,6 @@ public class MovesAsStringsTest {
 
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
-
         List<String> arr = generateMovesWRAsStrings(currentPosition);
         System.out.println(arr);
     }

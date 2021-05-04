@@ -16,6 +16,25 @@ public class BitMasks {
     static final long RANK_8 = 255L;
     static final long CENTRE = 103481868288L;
     static final long EXTENDED_CENTRE = 66229406269440L;
+    // Mask for the position of the king and rook for castling
+    static final long B_K_Castle = 144L;
+    static final long B_Q_Castle = 17L;
+    static final long W_K_Castle = -8070450532247928832L;
+    static final long W_Q_Castle = 1224979098644774912L;
+    // Mask for the king's movement during castling
+    static final long B_K_Castle_Inter = 112L;
+    static final long B_Q_Castle_Inter = 28L;
+    static final long W_K_Castle_Inter = 8070450532247928832L;
+    static final long W_Q_Castle_Inter = 2017612633061982208L;
+    // Mask of piece movement for castling
+    static final long BK_K_Castle_Move = 80L;
+    static final long BR_K_Castle_Move = -96L;
+    static final long BK_Q_Castle_Move = 20L;
+    static final long BR_Q_Castle_Move = 9L;
+    static final long WK_K_Castle_Move = 5764607523034234880L;
+    static final long WR_K_Castle_Move = -6917529027641081856L;
+    static final long WK_Q_Castle_Move = 1441151880758558720L;
+    static final long WR_Q_Castle_Move = 648518346341351424L;
     // BitMasks of the attack, array of size 64
     static long[] FILE;
     static long[] RANK;
@@ -30,8 +49,8 @@ public class BitMasks {
      *
      * if more than 1 bit is set, it will return the index of the smallest bit
      *
-     * @param bitboard
-     * @return
+     * @param bitboard a bitboard
+     * @return the index of the piece, if multiple, returns the lowest index
      */
     public static int getIndexFromBitboard(long bitboard){
         return Long.numberOfTrailingZeros(bitboard);

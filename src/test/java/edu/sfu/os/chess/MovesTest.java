@@ -7,6 +7,7 @@ import org.junit.Test;
 import java.util.List;
 
 import static edu.sfu.os.chess.Moves.*;
+import static edu.sfu.os.chess.MovesAsStrings.generateMovesWPAsStrings;
 
 /**
  * Unit test for Moves
@@ -156,6 +157,31 @@ public class MovesTest{
     }
 
     @Test
+    public void testGenerateCastlingKingWhite(){
+
+        String[][] chessBoard ={
+                {" ","n","b","q","k","b"," "," "},
+                {" ","P"," ","p","R"," ","P"," "},
+                {" "," "," "," "," ","b"," "," "},
+                {" ","p","b","B","p","P"," "," "},
+                {" "," ","p","P"," "," "," "," "},
+                {" "," "," "," "," "," "," "," "},
+                {"P"," ","R","R","R","R"," ","P"},
+                {"R"," "," "," ","K"," "," ","R"}};
+
+        System.out.println(" a  b  c  d  e  f  g  h ");
+        Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
+
+        List<List<Long>> arr = generateMovesWCastle(currentPosition);
+        for(var e : arr){
+            for(var bb : e){
+                System.out.println(" a  b  c  d  e  f  g  h ");
+                BoardGeneration.drawBitboard(bb);
+            }
+        }
+    }
+
+    @Test
     public void testMoves(){
 
         String[][] chessBoard ={
@@ -178,5 +204,61 @@ public class MovesTest{
             System.out.println(" a  b  c  d  e  f  g  h ");
             BoardGeneration.drawArray(moveWhite(currentPosition, bb));
         }
+    }
+
+    @Test
+    public void testCastle(){
+
+        String[][] chessBoard ={
+                {" ","n","b","q","k","b"," "," "},
+                {" ","P"," ","p","R"," ","P"," "},
+                {" "," "," "," "," ","b"," "," "},
+                {" ","p","b","B","p","P"," "," "},
+                {" "," ","p","P"," "," "," "," "},
+                {" "," "," "," "," "," "," "," "},
+                {"P"," ","R","R","R","R"," ","P"},
+                {"R"," "," "," ","K"," "," ","R"}};
+
+        System.out.println(" a  b  c  d  e  f  g  h ");
+        Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
+
+        List<List<Long>> arr = generateMovesWCastle(currentPosition);
+        for(var e : arr){
+            for(var bb : e){
+                System.out.println(" a  b  c  d  e  f  g  h ");
+                BoardGeneration.drawBitboard(bb);
+            }
+            System.out.println(" a  b  c  d  e  f  g  h ");
+            BoardGeneration.drawArray(castleWhite(currentPosition, e));
+        }
+    }
+
+    @Test
+    public void testEnPassant(){
+
+        String[][] chessBoard ={
+                {"r","n","b","q","k","b"," "," "},
+                {" ","P"," ","p"," "," "," "," "},
+                {" "," "," "," "," ","b"," "," "},
+                {" ","p","b"," ","p","P","p"," "},
+                {" "," ","P","P"," "," "," "," "},
+                {" "," "," "," "," "," "," "," "},
+                {"P"," "," "," "," "," ","P","P"},
+                {"R","N","B","Q","K","B","N","R"}};
+
+        System.out.println(" a  b  c  d  e  f  g  h ");
+        Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
+        currentPosition.lastMove = (BitMasks.RANK_1 >>> 48 | BitMasks.RANK_1 >>> 32) & BitMasks.FILE_A << 6;
+
+        List<List<Long>> arr = generateMovesWEnPassant(currentPosition);
+        for(var e : arr){
+            for(var bb : e){
+                System.out.println(" a  b  c  d  e  f  g  h ");
+                BoardGeneration.drawBitboard(bb);
+            }
+            System.out.println(" a  b  c  d  e  f  g  h ");
+            BoardGeneration.drawArray(enPassantWhite(currentPosition, e));
+        }
+
     }
 }
