@@ -1092,7 +1092,7 @@ public class Moves {
             // No rook exists
             return possibleMoves;
         }
-        long bb = WR;
+        long bb = BR;
         while(bb != 0){
             /// Get index of next piece
             int index = Long.numberOfTrailingZeros(bb);
@@ -1162,7 +1162,7 @@ public class Moves {
             // No bishop exists
             return possibleMoves;
         }
-        long bb = WB;
+        long bb = BB;
         while(bb != 0){
             // Get index of next piece
             int index = Long.numberOfTrailingZeros(bb);
