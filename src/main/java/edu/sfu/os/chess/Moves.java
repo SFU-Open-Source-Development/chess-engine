@@ -136,7 +136,7 @@ public class Moves {
      * @return a bitmask of all spaces that are invalid
      */
 
-    private static long whiteKingSafety(Board currentPosition){
+    public static long whiteKingSafety(Board currentPosition){
         long BP = currentPosition.BP;
         long BN = currentPosition.BN;
         long BB = currentPosition.BB;
@@ -302,7 +302,7 @@ public class Moves {
      * @return a bitmask of all spaces that are invalid
      */
 
-    private static long blackKingSafety(Board currentPosition){
+    public static long blackKingSafety(Board currentPosition){
         long BP = currentPosition.BP;
         long BN = currentPosition.BN;
         long BB = currentPosition.BB;
