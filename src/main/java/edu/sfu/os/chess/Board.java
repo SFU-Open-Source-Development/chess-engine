@@ -62,4 +62,12 @@ public class Board {
 
         this.castleCheck = currPosition.castleCheck;
     }
+
+    public long getWhite(){
+        return WP | WN | WB | WR | WQ | WK;
+    }
+
+    public long getBlack(){
+        return BP | BN | BB | BR | BQ | BK;
+    }
 }

@@ -461,6 +461,7 @@ public class Moves {
     }
 
     // Moves Generation
+
     public static List<Long> generateMovesWP(Board currentPosition){
 
         // Retrieve bitmap from Board;
@@ -1520,5 +1521,174 @@ public class Moves {
         newBoard.lastMove = move;
         newBoard.castleCheck |= move;
         return newBoard;
+    }
+
+    private static List<Integer> pieceIndex(long bb){
+
+        List<Integer> indexList = new ArrayList<>();
+
+        while(bb != 0){
+            // Get index of next piece
+            int index = Long.numberOfTrailingZeros(bb);
+            // Remove from bitboard
+            bb ^= 1L << index;
+            indexList.add(index);
+        }
+
+        return indexList;
+    }
+
+    private static long hq(final long pieceMask, final long pieceMaskReversed, final long mask, final long ALL_PIECES) {
+
+        /*
+            reference: https://www.youtube.com/watch?v=bCH4YK6oq8M&ab_channel=LogicCrazyChess
+
+            ========= The Trick ===========
+            occupied=11000101 as (o)
+            slider=00000100   as (s)
+            o-s=11000001
+            o-2s=10111101     // equals to shifting to left by 1
+            left=o^(o-2s)=01111000
+            ===============================
+
+            Combining left and right
+            lineAttacks=(((o&m)-2s) ^ ((o&m)'-2s')')&m
+        */
+
+        long occupiedMask = ALL_PIECES & mask;
+        long occupiedMaskReversed = BitMasks.reverse64bits(occupiedMask);
+        return ((occupiedMask - (2 * pieceMask)) ^ BitMasks.reverse64bits(occupiedMaskReversed- 2 * pieceMaskReversed) & mask);
+
+    }
+
+    public static List<Long> generateMovesN(final long PLAYER, final long PLAYER_PIECES){
+
+        List<Long> possibleMoves = new ArrayList<>();
+
+        pieceIndex(PLAYER).forEach(i -> {
+            long pieceMask = 1L << i;
+            long moves = 0L;
+
+            /*  Ordering of the knight moves
+             *  * 8 * 0 *
+             *  7 * * * 1
+             *  * * N * *
+             *  6 * * * 2
+             *  * 5 * 4 *
+             */
+            moves |= (pieceMask >>> 15 & ~(PLAYER_PIECES | BitMasks.FILE_A));
+            moves |= (pieceMask >>> 15 & ~(PLAYER_PIECES | BitMasks.FILE_A));
+            moves |= (pieceMask >>> 6 & ~(PLAYER_PIECES | BitMasks.FILE_AB));
+            moves |= (pieceMask << 10 & ~(PLAYER_PIECES | BitMasks.FILE_AB));
+            moves |= (pieceMask << 17 & ~(PLAYER_PIECES | BitMasks.FILE_A));
+            moves |= (pieceMask << 15 & ~(PLAYER_PIECES | BitMasks.FILE_H));
+            moves |= (pieceMask << 6 & ~(PLAYER_PIECES | BitMasks.FILE_GH));
+            moves |= (pieceMask >>> 10 & ~(PLAYER_PIECES | BitMasks.FILE_GH));
+            moves |= (pieceMask >>> 17 & ~(PLAYER_PIECES | BitMasks.FILE_H));
+
+            possibleMoves.addAll(bitboardToBitMask(moves, pieceMask));
+        });
+
+        return possibleMoves;
+    }
+
+    public static List<Long> generateMovesK(final long PLAYER, final long PLAYER_PIECES){
+
+        List<Long> possibleMoves = new ArrayList<>();
+
+        pieceIndex(PLAYER).forEach(i -> {
+            long pieceMask = 1L << i;
+            long moves = 0L;
+
+            /* Ordering of the king moves
+             *  0 1 2
+             *  3 K 4
+             *  5 6 7
+             */
+
+            moves |= (pieceMask >>> 9 & ~(PLAYER_PIECES | BitMasks.FILE_H));
+            moves |= (pieceMask >>> 8 & ~(PLAYER_PIECES));
+            moves |= (pieceMask >>> 7 & ~(PLAYER_PIECES | BitMasks.FILE_A));
+            moves |= (pieceMask >>> 1 & ~(PLAYER_PIECES | BitMasks.FILE_H));
+            moves |= (pieceMask << 1 & ~(PLAYER_PIECES | BitMasks.FILE_A));
+            moves |= (pieceMask << 7 & ~(PLAYER_PIECES | BitMasks.FILE_H));
+            moves |= (pieceMask << 8 & ~(PLAYER_PIECES));
+            moves |= (pieceMask << 9 & ~(PLAYER_PIECES | BitMasks.FILE_A));
+
+            possibleMoves.addAll(bitboardToBitMask(moves, pieceMask));
+        });
+
+        return possibleMoves;
+    }
+
+    public static List<Long> generateMovesR(final long PLAYER, final long PLAYER_PIECES, final long OPP_PIECES){
+        final long ALL_PIECES = PLAYER_PIECES | OPP_PIECES;
+
+        List<Long> possibleMoves = new ArrayList<>();
+
+        pieceIndex(PLAYER).forEach(i -> {
+            long pieceMask = 1L << i;
+            final long pieceMaskReversed = BitMasks.reverse64bits(pieceMask);
+
+            final long mask1 = BitMasks.RANK[i];
+            final long mask2 = BitMasks.FILE[i];
+
+            // search Horizontally / in the Rank
+            possibleMoves.addAll(bitboardToBitMask(hq(pieceMask, pieceMaskReversed, mask1, ALL_PIECES), pieceMask));
+            // search Vertically / in the File
+            possibleMoves.addAll(bitboardToBitMask(hq(pieceMask, pieceMaskReversed, mask2, ALL_PIECES), pieceMask));
+
+        });
+
+        return possibleMoves;
+    }
+
+    public static List<Long> generateMovesB(final long PLAYER, final long PLAYER_PIECES, final long OPP_PIECES){
+        final long ALL_PIECES = PLAYER_PIECES | OPP_PIECES;
+
+        List<Long> possibleMoves = new ArrayList<>();
+
+        pieceIndex(PLAYER).forEach(i -> {
+            long pieceMask = 1L << i;
+            final long pieceMaskReversed = BitMasks.reverse64bits(pieceMask);
+
+            final long mask1 = BitMasks.DIAG[i];
+            final long mask2 = BitMasks.ANTIDIAG[i];
+
+            // search Horizontally / in the Rank
+            possibleMoves.addAll(bitboardToBitMask(hq(pieceMask, pieceMaskReversed, mask1, ALL_PIECES), pieceMask));
+            // search Vertically / in the File
+            possibleMoves.addAll(bitboardToBitMask(hq(pieceMask, pieceMaskReversed, mask2, ALL_PIECES), pieceMask));
+
+        });
+
+        return possibleMoves;
+    }
+
+    public static List<Long> generateMovesQ(final long PLAYER, final long PLAYER_PIECES, final long OPP_PIECES){
+        final long ALL_PIECES = PLAYER_PIECES | OPP_PIECES;
+
+        List<Long> possibleMoves = new ArrayList<>();
+
+        pieceIndex(PLAYER).forEach(i -> {
+            long pieceMask = 1L << i;
+            final long pieceMaskReversed = BitMasks.reverse64bits(pieceMask);
+
+            final long mask1 = BitMasks.RANK[i];
+            final long mask2 = BitMasks.FILE[i];
+            final long mask3 = BitMasks.DIAG[i];
+            final long mask4 = BitMasks.ANTIDIAG[i];
+
+            // search Horizontally / in the Rank
+            possibleMoves.addAll(bitboardToBitMask(hq(pieceMask, pieceMaskReversed, mask1, ALL_PIECES), pieceMask));
+            // search Vertically / in the File
+            possibleMoves.addAll(bitboardToBitMask(hq(pieceMask, pieceMaskReversed, mask2, ALL_PIECES), pieceMask));
+            // search Diagonally
+            possibleMoves.addAll(bitboardToBitMask(hq(pieceMask, pieceMaskReversed, mask3, ALL_PIECES), pieceMask));
+            // search AntiDiagonally
+            possibleMoves.addAll(bitboardToBitMask(hq(pieceMask, pieceMaskReversed, mask4, ALL_PIECES), pieceMask));
+        });
+
+        return possibleMoves;
     }
 }
