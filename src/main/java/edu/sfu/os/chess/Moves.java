@@ -483,7 +483,7 @@ public class Moves {
         long WQ = currentPosition.WQ;
         long WK = currentPosition.WK;
 
-        final long WP_INITIAL = BitMasks.RANK_1 >>> 8; // white's initial pawn position
+        //final long WP_INITIAL = BitMasks.RANK_1 >>> 8; // white's initial pawn position
         final long BLACK_PIECES = BP | BN | BB | BR | BQ | BK; // Black's current pieces position
         final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
         final long ALL_PIECES = WHITE_PIECES | BLACK_PIECES;
@@ -492,7 +492,7 @@ public class Moves {
 
         // moves
         long moveUpOne = WP >>> 8 & ~(ALL_PIECES) & ~(BitMasks.RANK_8); // check for 1 step up, remove pieces that hit promotion
-        long moveUpTwo = (WP & WP_INITIAL) >>> 16 & ~((ALL_PIECES) | ((ALL_PIECES) << 8) ) ; // check for 2 steps up
+        long moveUpTwo = (moveUpOne & BitMasks.RANK_1 >>> 16) >>> 8 & ~(ALL_PIECES);
         // Attacks
         long captureLeft = WP >>> 9 & BLACK_PIECES & ~(BitMasks.FILE_H) & ~(BitMasks.RANK_8);
         long captureRight = WP >>> 7 & BLACK_PIECES & ~(BitMasks.FILE_A) & ~(BitMasks.RANK_8);
@@ -934,7 +934,7 @@ public class Moves {
         long WQ = currentPosition.WQ;
         long WK = currentPosition.WK;
 
-        final long BP_INITIAL = BitMasks.RANK_1 >>> 48; // Black's initial pawn position
+        //final long BP_INITIAL = BitMasks.RANK_8 << 8; // Black's initial pawn position
         final long BLACK_PIECES = BP | BN | BB | BR | BQ | BK; // Black's current pieces position
         final long WHITE_PIECES = WP | WN | WB | WR | WQ | WK; // White's current pieces position
         final long ALL_PIECES = BLACK_PIECES | WHITE_PIECES;
@@ -943,7 +943,7 @@ public class Moves {
 
         // moves
         long moveDownOne = BP << 8 & ~(ALL_PIECES) & ~(BitMasks.RANK_1); // check for 1 step up, remove pieces that hit promotion
-        long moveDownTwo = (BP & BP_INITIAL) << 16 & ~((ALL_PIECES) | ((ALL_PIECES) << 8)) ; // check for 2 steps down
+        long moveDownTwo = (moveDownOne & BitMasks.RANK_8 << 16) << 8 & ~(ALL_PIECES);
         // Attacks
         long captureLeft = BP << 7 & WHITE_PIECES & ~(BitMasks.FILE_H) & ~(BitMasks.RANK_1);
         long captureRight = BP << 9 & WHITE_PIECES & ~(BitMasks.FILE_A) & ~(BitMasks.RANK_1);
