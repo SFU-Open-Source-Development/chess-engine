@@ -172,12 +172,12 @@ public class MovesTest{
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
 
-        List<List<Long>> arr = generateMovesWCastle(currentPosition);
+        List<SpecialMoves> arr = generateMovesWCastle(currentPosition);
         for(var e : arr){
-            for(var bb : e){
-                System.out.println(" a  b  c  d  e  f  g  h ");
-                BoardGeneration.drawBitboard(bb);
-            }
+            System.out.println(" a  b  c  d  e  f  g  h ");
+            BoardGeneration.drawBitboard(e.moveMask1);
+            System.out.println(" a  b  c  d  e  f  g  h ");
+            BoardGeneration.drawBitboard(e.moveMask2);
         }
     }
 
@@ -197,10 +197,10 @@ public class MovesTest{
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
 
-        List<List<Long>> arr = generateMovesWPromotion(currentPosition);
+        List<SpecialMoves> arr = generateMovesWPromotion(currentPosition);
         for(var e : arr){
             System.out.println(" a  b  c  d  e  f  g  h ");
-            BoardGeneration.drawBitboard(e.get(0));
+            BoardGeneration.drawBitboard(e.moveMask1);
         }
 
     }
@@ -246,14 +246,10 @@ public class MovesTest{
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
 
-        List<List<Long>> arr = generateMovesWCastle(currentPosition);
+        List<SpecialMoves> arr = generateMovesWCastle(currentPosition);
         for(var e : arr){
-            for(var bb : e){
-                System.out.println(" a  b  c  d  e  f  g  h ");
-                BoardGeneration.drawBitboard(bb);
-            }
             System.out.println(" a  b  c  d  e  f  g  h ");
-            BoardGeneration.drawArray(castleWhite(currentPosition, e));
+            BoardGeneration.drawArray(specialMoveWhite(currentPosition, e));
         }
     }
 
@@ -274,14 +270,14 @@ public class MovesTest{
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
         currentPosition.lastMove = (BitMasks.RANK_1 >>> 48 | BitMasks.RANK_1 >>> 32) & BitMasks.FILE_A << 6;
 
-        List<List<Long>> arr = generateMovesWEnPassant(currentPosition);
+        List<SpecialMoves> arr = generateMovesWEnPassant(currentPosition);
         for(var e : arr){
-            for(var bb : e){
-                System.out.println(" a  b  c  d  e  f  g  h ");
-                BoardGeneration.drawBitboard(bb);
-            }
             System.out.println(" a  b  c  d  e  f  g  h ");
-            BoardGeneration.drawArray(enPassantWhite(currentPosition, e));
+            BoardGeneration.drawBitboard(e.moveMask1);
+            System.out.println(" a  b  c  d  e  f  g  h ");
+            BoardGeneration.drawBitboard(e.moveMask2);
+            System.out.println(" a  b  c  d  e  f  g  h ");
+            BoardGeneration.drawArray(specialMoveWhite(currentPosition, e));
         }
 
     }
@@ -302,124 +298,13 @@ public class MovesTest{
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
 
-        List<List<Long>> arr = generateMovesWPromotion(currentPosition);
+        List<SpecialMoves> arr = generateMovesWPromotion(currentPosition);
         for(var e : arr){
             System.out.println(" a  b  c  d  e  f  g  h ");
-            BoardGeneration.drawBitboard(e.get(0));
+            BoardGeneration.drawBitboard(e.moveMask1);
             System.out.println(" a  b  c  d  e  f  g  h ");
-            BoardGeneration.drawArray(promotionWhite(currentPosition, e));
+            BoardGeneration.drawArray(specialMoveWhite(currentPosition, e));
         }
 
-    }
-
-    @Test
-    public void testGenerateMovesKnightWhiteF(){
-
-        String[][] chessBoard ={
-                {"r","n","b","q","k","b"," "," "},
-                {" ","P"," ","p"," "," ","P"," "},
-                {" "," "," "," "," "," "," "," "},
-                {" ","p"," "," ","p","P"," "," "},
-                {" "," ","P","P"," "," "," "," "},
-                {"N"," "," "," "," "," "," ","N"},
-                {"P"," "," "," "," "," ","P","P"},
-                {"R"," ","B","Q","K","B"," "," "}};
-
-        System.out.println(" a  b  c  d  e  f  g  h ");
-        Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
-        List<Long> arr = generateMovesGeneric(currentPosition.WN, currentPosition.getWhite(), currentPosition.getBlack(), PieceType.KNIGHT);
-        for(var bb : arr){
-            System.out.println(" a  b  c  d  e  f  g  h ");
-            BoardGeneration.drawBitboard(bb);
-        }
-    }
-
-    @Test
-    public void testGenerateMovesKingWhiteF(){
-
-        String[][] chessBoard ={
-                {"r","n","b","q","k","b"," "," "},
-                {" ","P"," ","p"," "," ","P"," "},
-                {" "," "," "," "," ","b"," "," "},
-                {" ","p","b"," "," "," "," "," "},
-                {" "," ","P","P"," ","K"," "," "},
-                {" "," "," "," "," "," "," "," "},
-                {"P"," "," ","B"," ","P","P","P"},
-                {"R","N","B","Q"," ","B","N","R"}};
-
-        System.out.println(" a  b  c  d  e  f  g  h ");
-        Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
-        List<Long> arr = generateMovesK(currentPosition.WK, currentPosition.getWhite());
-        for(var bb : arr){
-            System.out.println(" a  b  c  d  e  f  g  h ");
-            BoardGeneration.drawBitboard(bb);
-        }
-    }
-    @Test
-    public void testGenerateMovesRookWhiteF(){
-
-        String[][] chessBoard ={
-                {" ","n","b","q","k","b"," "," "},
-                {" ","P"," ","p","R"," ","P"," "},
-                {" "," "," "," "," ","b"," "," "},
-                {" ","p","b"," ","p","P"," "," "},
-                {" "," ","P","P"," "," "," "," "},
-                {" "," "," "," "," "," "," "," "},
-                {"P"," ","R"," "," "," ","P","P"},
-                {" ","N","B","Q"," ","B","R"," "}};
-
-        System.out.println(" a  b  c  d  e  f  g  h ");
-        Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
-        List<Long> arr = generateMovesR(currentPosition.WR, currentPosition.getWhite(), currentPosition.getBlack());
-        for(var bb : arr){
-            System.out.println(" a  b  c  d  e  f  g  h ");
-            BoardGeneration.drawBitboard(bb);
-        }
-    }
-
-    @Test
-    public void testGenerateMovesBishopWhiteF(){
-
-        String[][] chessBoard ={
-                {" ","n","b","q","k","b"," "," "},
-                {" ","P"," ","p","R"," ","P"," "},
-                {" "," "," "," "," ","b"," "," "},
-                {" ","p","b","B","p","P"," "," "},
-                {" "," ","p","P"," "," "," "," "},
-                {" "," "," "," "," "," "," "," "},
-                {"P"," ","R"," "," "," ","p","P"},
-                {" ","N","B","Q"," ","B","R","B"}};
-
-        System.out.println(" a  b  c  d  e  f  g  h ");
-        Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
-
-        List<Long> arr = generateMovesGeneric(currentPosition.WB, currentPosition.getWhite(), currentPosition.getBlack(), PieceType.BISHOP);
-        for(var bb : arr){
-            System.out.println(" a  b  c  d  e  f  g  h ");
-            BoardGeneration.drawBitboard(bb);
-        }
-    }
-
-    @Test
-    public void testGenerateMovesWhiteQueensF(){
-
-        String[][] chessBoard ={
-                {" ","n","b","q","k","b"," "," "},
-                {" ","P"," ","p","R"," ","P"," "},
-                {" "," "," "," "," ","b"," "," "},
-                {" ","p","b","Q","p","P"," "," "},
-                {" "," ","p","P"," "," "," "," "},
-                {" "," "," "," "," "," "," "," "},
-                {"P"," ","R"," "," "," ","p","P"},
-                {" ","N","B","Q"," ","B","R","B"}};
-
-        System.out.println(" a  b  c  d  e  f  g  h ");
-        Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
-
-        List<Long> arr = generateMovesQ(currentPosition.WQ, currentPosition.getWhite(), currentPosition.getBlack());
-        for(var bb : arr){
-            System.out.println(" a  b  c  d  e  f  g  h ");
-            BoardGeneration.drawBitboard(bb);
-        }
     }
 }
