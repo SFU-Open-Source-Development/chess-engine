@@ -33,7 +33,7 @@ public class BitMasks {
     static final long W_Q_Castle_Block = 1008806316530991104L;
     // Mask of piece movement for castling
     static final long BK_K_Castle_Move = 80L;
-    static final long BR_K_Castle_Move = -96L;
+    static final long BR_K_Castle_Move = 160L;
     static final long BK_Q_Castle_Move = 20L;
     static final long BR_Q_Castle_Move = 9L;
     static final long WK_K_Castle_Move = 5764607523034234880L;

@@ -31,11 +31,15 @@ public class Perft {
         perft(currentPosition,true,0);
         System.out.println("depth " + perftMaxDepth + " total possible moves " + possibleMovesTotal);
         System.out.println("depth " + perftMaxDepth + " castle possible moves " + castleMovesTotal);
+        System.out.println("depth " + perftMaxDepth + " enPassant possible moves " + enPassantMovesTotal);
+        System.out.println("depth " + perftMaxDepth + " promotion possible moves " + promotionMovesTotal);
         System.out.println("rejected "+ rejectedMovesCount);
     }
-    static int perftMaxDepth = 3;//number of layers to calculate for perft testing
+    static int perftMaxDepth = 5;//number of layers to calculate for perft testing
     static List<Long> possibleMovesTotal = new ArrayList<>(Collections.nCopies(perftMaxDepth, 0L));
     static List<Long> castleMovesTotal = new ArrayList<>(Collections.nCopies(perftMaxDepth, 0L));
+    static List<Long> enPassantMovesTotal = new ArrayList<>(Collections.nCopies(perftMaxDepth, 0L));
+    static List<Long> promotionMovesTotal = new ArrayList<>(Collections.nCopies(perftMaxDepth, 0L));
     static int rejectedMovesCount = 0;
 
     public static void perft(Board currentBoard, Boolean WhiteToMove, int depth) {
@@ -63,15 +67,14 @@ public class Perft {
                     if((Moves.whiteKingSafety(tmpBoard)&tmpBoard.WK)==0) {//compute king safety after each move
                         //System.out.println("^Move Accepted");
                         possibleMovesTotal.set(depth, possibleMovesTotal.get(depth) + 1);
-                        if(i.moveType == MoveType.CASTLE){
-                            castleMovesTotal.set(depth, castleMovesTotal.get(depth) + 1);
+                        switch(i.moveType){
+                            case CASTLE -> castleMovesTotal.set(depth, castleMovesTotal.get(depth) + 1);
+                            case ENPASSANT -> enPassantMovesTotal.set(depth, enPassantMovesTotal.get(depth) + 1);
+                            case PROMOTION -> promotionMovesTotal.set(depth, promotionMovesTotal.get(depth) + 1);
                         }
                         perft(tmpBoard, false, depth + 1);
                     } else{
                         rejectedMovesCount++;
-                        if(i.moveType == MoveType.CASTLE){
-                            System.out.println("FAILURE");
-                        }
                         //System.out.println("^Move rejected");
                     }
                 }
@@ -98,6 +101,11 @@ public class Perft {
                     if((Moves.blackKingSafety(tmpBoard)&tmpBoard.BK)==0) {//compute king safety after each move
                         //System.out.println("^Move Accepted");
                         possibleMovesTotal.set(depth, possibleMovesTotal.get(depth) + 1);
+                        switch(i.moveType){
+                            case CASTLE -> castleMovesTotal.set(depth, castleMovesTotal.get(depth) + 1);
+                            case ENPASSANT -> enPassantMovesTotal.set(depth, enPassantMovesTotal.get(depth) + 1);
+                            case PROMOTION -> promotionMovesTotal.set(depth, promotionMovesTotal.get(depth) + 1);
+                        }
                         perft(tmpBoard, true, depth + 1);
                     } else{
                         rejectedMovesCount++;
