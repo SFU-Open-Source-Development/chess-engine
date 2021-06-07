@@ -327,7 +327,7 @@ public class MovesTest{
 
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
-        List<Long> arr = generateMovesN(currentPosition.WN, currentPosition.getWhite());
+        List<Long> arr = generateMovesGeneric(currentPosition.WN, currentPosition.getWhite(), currentPosition.getBlack(), PieceType.KNIGHT);
         for(var bb : arr){
             System.out.println(" a  b  c  d  e  f  g  h ");
             BoardGeneration.drawBitboard(bb);
@@ -393,7 +393,7 @@ public class MovesTest{
         System.out.println(" a  b  c  d  e  f  g  h ");
         Board currentPosition = BoardGeneration.arrayToBitboards(chessBoard);
 
-        List<Long> arr = generateMovesB(currentPosition.WB, currentPosition.getWhite(), currentPosition.getBlack());
+        List<Long> arr = generateMovesGeneric(currentPosition.WB, currentPosition.getWhite(), currentPosition.getBlack(), PieceType.BISHOP);
         for(var bb : arr){
             System.out.println(" a  b  c  d  e  f  g  h ");
             BoardGeneration.drawBitboard(bb);

@@ -90,7 +90,12 @@ public class Moves {
             // Get index of next piece
             int index = Long.numberOfTrailingZeros(bb);
             long pieceMask = 1L << index;
-            possibleMoves.add(pieceMask | (pieceMask << offset));
+            if(offset < 0){
+                possibleMoves.add(pieceMask | (pieceMask >>> (-offset)));
+            }
+            else{
+                possibleMoves.add(pieceMask | (pieceMask << offset));
+            }
             bb ^= pieceMask;
         }
         return possibleMoves;
@@ -487,7 +492,7 @@ public class Moves {
 
         // moves
         long moveUpOne = WP >>> 8 & ~(ALL_PIECES) & ~(BitMasks.RANK_8); // check for 1 step up, remove pieces that hit promotion
-        long moveUpTwo = (WP & WP_INITIAL) >> 16 & ~((ALL_PIECES) | ((ALL_PIECES) << 8) ) ; // check for 2 steps up
+        long moveUpTwo = (WP & WP_INITIAL) >>> 16 & ~((ALL_PIECES) | ((ALL_PIECES) << 8) ) ; // check for 2 steps up
         // Attacks
         long captureLeft = WP >>> 9 & BLACK_PIECES & ~(BitMasks.FILE_H) & ~(BitMasks.RANK_8);
         long captureRight = WP >>> 7 & BLACK_PIECES & ~(BitMasks.FILE_A) & ~(BitMasks.RANK_8);
@@ -1689,6 +1694,73 @@ public class Moves {
             possibleMoves.addAll(bitboardToBitMask(hq(pieceMask, pieceMaskReversed, mask4, ALL_PIECES), pieceMask));
         });
 
+        return possibleMoves;
+    }
+
+    enum PieceType {
+        KNIGHT,
+        BISHOP,
+        ROOK,
+        QUEEN,
+        KING,
+    }
+
+    public static List<Long> generateMovesGeneric(final long PLAYER, final long PLAYER_PIECES, final long OPP_PIECES, final PieceType PIECE_TYPE){
+        final long ALL_PIECES = PLAYER_PIECES | OPP_PIECES;
+
+        List<Long> possibleMoves = new ArrayList<>();
+        long bb = PLAYER;
+        while(bb != 0){
+            // Get index of next piece
+            final int index = Long.numberOfTrailingZeros(bb);
+            final long pieceMask = 1L << index;
+            // Remove from bitboard
+            bb ^= pieceMask;
+            long moves = 0L;
+            switch(PIECE_TYPE){
+                case KNIGHT -> {
+                    moves |= (pieceMask >>> 15 & ~(PLAYER_PIECES | BitMasks.FILE_A));
+                    moves |= (pieceMask >>> 15 & ~(PLAYER_PIECES | BitMasks.FILE_A));
+                    moves |= (pieceMask >>> 6 & ~(PLAYER_PIECES | BitMasks.FILE_AB));
+                    moves |= (pieceMask << 10 & ~(PLAYER_PIECES | BitMasks.FILE_AB));
+                    moves |= (pieceMask << 17 & ~(PLAYER_PIECES | BitMasks.FILE_A));
+                    moves |= (pieceMask << 15 & ~(PLAYER_PIECES | BitMasks.FILE_H));
+                    moves |= (pieceMask << 6 & ~(PLAYER_PIECES | BitMasks.FILE_GH));
+                    moves |= (pieceMask >>> 10 & ~(PLAYER_PIECES | BitMasks.FILE_GH));
+                    moves |= (pieceMask >>> 17 & ~(PLAYER_PIECES | BitMasks.FILE_H));
+
+                    possibleMoves.addAll(bitboardToBitMask(moves, pieceMask));
+                }
+                case BISHOP -> {
+                    long pieceMaskReversed = BitMasks.reverse64bits(pieceMask);
+
+                    final long mask1 = BitMasks.DIAG[index];
+                    final long mask2 = BitMasks.ANTIDIAG[index];
+
+                    final long occupiedMask1 = ALL_PIECES & mask1;
+                    final long occupiedMask1Reversed = BitMasks.reverse64bits(occupiedMask1);
+                    moves |= ((occupiedMask1 - (2 * pieceMask)) ^ BitMasks.reverse64bits(occupiedMask1Reversed- 2 * pieceMaskReversed) & mask1);
+
+                    final long occupiedMask2 = ALL_PIECES & mask2;
+                    final long occupiedMask2Reversed = BitMasks.reverse64bits(occupiedMask2);
+                    moves |= ((occupiedMask2 - (2 * pieceMask)) ^ BitMasks.reverse64bits(occupiedMask2Reversed- 2 * pieceMaskReversed) & mask2);
+
+                    moves = moves & ~PLAYER_PIECES;
+
+                    // search Horizontally / in the Rank
+                    possibleMoves.addAll(bitboardToBitMask(moves, pieceMask));
+                }
+                case ROOK -> {
+
+                }
+                case QUEEN -> {
+
+                }
+                case KING -> {
+
+                }
+            }
+        }
         return possibleMoves;
     }
 }
