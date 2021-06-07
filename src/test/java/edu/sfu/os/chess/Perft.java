@@ -45,7 +45,7 @@ public class Perft {
                     BoardGeneration.drawArray(tmpBoard);
                     if((Moves.blackKingSafety(tmpBoard)&tmpBoard.BK)==0) {//compute king safety after each move
                         //System.out.println("^Move Accepted");
-                        perft(tmpBoard, false, depth + 1);
+                        perft(tmpBoard, true, depth + 1);
                     }else{
                         possibleMovesTotal--;//remove illegal move from total
                         System.out.println("^Move rejected");
