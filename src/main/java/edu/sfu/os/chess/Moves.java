@@ -132,7 +132,7 @@ public class Moves {
             Stream.of(PromotionType.values()).forEach(i -> {
                 SpecialMoves move = new SpecialMoves();
                 move.moveMask1 = (offset > 0) ? pieceMask | (pieceMask << offset) : pieceMask | (pieceMask >>> (-offset));
-                move.promotionType = PromotionType.KNIGHT;
+                move.promotionType = i;
                 move.moveType = MoveType.PROMOTION;
                 possibleMoves.add(move);
             });
