@@ -64,7 +64,7 @@ public class Perft {
                     Board tmpBoard = Moves.specialMoveWhite(currentBoard, i);
                     //System.out.println("White Move to attempt:");
                     //BoardGeneration.drawArray(tmpBoard);
-                    if((Moves.whiteKingSafety(tmpBoard)&tmpBoard.WK)==0) {//compute king safety after each move
+                    if((Moves.whiteKingSafety(tmpBoard) & tmpBoard.WK)==0) {//compute king safety after each move
                         //System.out.println("^Move Accepted");
                         possibleMovesTotal.set(depth, possibleMovesTotal.get(depth) + 1);
                         switch(i.moveType){
@@ -84,7 +84,7 @@ public class Perft {
                     Board tmpBoard = Moves.moveBlack(currentBoard, i);
                     //System.out.println("Black Move to attempt:");
                     //BoardGeneration.drawArray(tmpBoard);
-                    if((Moves.blackKingSafety(tmpBoard)&tmpBoard.BK)==0) {//compute king safety after each move
+                    if((Moves.blackKingSafety(tmpBoard) & tmpBoard.BK)==0) {//compute king safety after each move
                         //System.out.println("^Move Accepted");
                         possibleMovesTotal.set(depth, possibleMovesTotal.get(depth) + 1);
                         perft(tmpBoard, true, depth + 1);
@@ -98,7 +98,7 @@ public class Perft {
                     Board tmpBoard = Moves.specialMoveBlack(currentBoard, i);
                     //System.out.println("Black Move to attempt:");
                     //BoardGeneration.drawArray(tmpBoard);
-                    if((Moves.blackKingSafety(tmpBoard)&tmpBoard.BK)==0) {//compute king safety after each move
+                    if((Moves.blackKingSafety(tmpBoard) & tmpBoard.BK)==0) {//compute king safety after each move
                         //System.out.println("^Move Accepted");
                         possibleMovesTotal.set(depth, possibleMovesTotal.get(depth) + 1);
                         switch(i.moveType){

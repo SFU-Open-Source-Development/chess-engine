@@ -1463,7 +1463,6 @@ public class Moves {
                 newBoard.BB &= ~move;
                 newBoard.BR &= ~move;
                 newBoard.BQ &= ~move;
-                newBoard.BK &= ~move;
                 switch (promotion) {
                     case KNIGHT -> newBoard.WN |= promotionMask;
                     case BISHOP -> newBoard.WB |= promotionMask;
@@ -1500,12 +1499,11 @@ public class Moves {
                 long move = moveMask.moveMask1;
                 PromotionType promotion = moveMask.promotionType;
                 long promotionMask = move & BitMasks.RANK_1;
-                newBoard.WP &= ~move;
+                newBoard.BP &= ~move;
                 newBoard.WN &= ~move;
                 newBoard.WB &= ~move;
                 newBoard.WR &= ~move;
                 newBoard.WQ &= ~move;
-                newBoard.WK &= ~move;
                 switch (promotion) {
                     case KNIGHT -> newBoard.BN |= promotionMask;
                     case BISHOP -> newBoard.BB |= promotionMask;
