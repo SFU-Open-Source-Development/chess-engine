@@ -9,6 +9,13 @@ import java.util.*;
 
 public class BoardGeneration {
 
+    public static Board initiateStandardChessFEN(String fenString) {
+        FENParser fenParser = new FENParser(fenString);
+        Board bitboards = fenParser.getBitboards();
+        drawArray(bitboards);
+        return bitboards;
+    }
+
     public static Board initiateStandardChess() {
 
         // Uppercase is WHITE and lowercase is BLACK

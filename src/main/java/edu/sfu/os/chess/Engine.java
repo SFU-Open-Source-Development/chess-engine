@@ -14,6 +14,7 @@ public class Engine
     public static void main( String[] args )
     {
         BitMasks.initBitMasks();
-        //currentPosition = BoardGeneration.initiateStandardChess();
+        String fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        currentPosition = BoardGeneration.initiateStandardChessFEN(fen);
     }
 }
