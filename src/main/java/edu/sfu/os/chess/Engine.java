@@ -13,7 +13,7 @@ public class Engine
 
     public static void main( String[] args )
     {
-        //currentPosition = BoardGeneration.initiateStandardChess();
+        BitMasks.initBitMasks();
         String fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         currentPosition = BoardGeneration.initiateStandardChessFEN(fen);
     }

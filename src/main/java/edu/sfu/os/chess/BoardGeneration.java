@@ -117,6 +117,7 @@ public class BoardGeneration {
         for (int i=0;i<8;i++) {
             System.out.println(Arrays.toString(chessBoard[i]));
         }
+        System.out.println();
     }
 
     /**
@@ -140,5 +141,6 @@ public class BoardGeneration {
         for (int i = 0; i < 8; i++) {
             System.out.println(Arrays.toString(chessBoard[i]));
         }
+        System.out.println();
     }
 }
